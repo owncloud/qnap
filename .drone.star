@@ -1,5 +1,5 @@
 config = {
-	'app': 'openidconnect',
+	'app': 'qnap',
 	'rocketchat': {
 		'channel': 'builds',
 		'from_secret': 'private_rocketchat'
@@ -26,15 +26,6 @@ config = {
 	},
 
 	'phpunit': {
-		'allDatabases' : {
-			'phpVersions': [
-				'7.2',
-			],
-            'databases': [
-                'mariadb:10.2', 'mysql:5.5', 'mysql:5.7', 'postgres:9.4', 'oracle'
-            ],
-			'coverage': False
-		},
 		'codecov' : {
 			'phpVersions': [
 				'7.2',

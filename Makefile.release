@@ -16,7 +16,7 @@ ifndef GIT
 endif
 
 
-app_name=openidconnect
+app_name=qnap
 build_dir=$(CURDIR)/build
 dist_dir=$(build_dir)/dist
 src_files=README.md LICENSE
