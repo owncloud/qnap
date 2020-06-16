@@ -12,7 +12,7 @@
     <website>https://github.com/owncloud/qnap</website>
     <bugs>https://github.com/owncloud/qnap/issues</bugs>
     <repository type="git">https://github.com/owncloud/qnap.git</repository>
-    <screenshot>https://raw.githubusercontent.com/owncloud/screenshots/master/openidconnect/openidconnect.png</screenshot>
+    <screenshot>https://raw.githubusercontent.com/owncloud/screenshots/master/qnap/qnap.png</screenshot>
     <dependencies>
         <owncloud min-version="10" max-version="10"/>
     </dependencies>

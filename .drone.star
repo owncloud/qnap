@@ -1,5 +1,5 @@
 config = {
-	'app': 'openidconnect',
+	'app': 'qnap',
 	'rocketchat': {
 		'channel': 'builds',
 		'from_secret': 'private_rocketchat'
