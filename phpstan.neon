@@ -1,0 +1,4 @@
+parameters:
+  autoload_directories:
+    - lib
+  bootstrap: %currentWorkingDirectory%/../../lib/base.php
