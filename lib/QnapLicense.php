@@ -28,7 +28,12 @@ class QnapLicense // implements ILicense
 		if ($licenseFile === false) {
 			return;
 		}
-		$this->license = \json_decode($licenseFile, true);
+		$cmdOutput = \json_decode($licenseFile, true);
+		if ($cmdOutput === null) {
+			return;
+		}
+
+		$this->license = $cmdOutput['result'];
 		if ($this->license === null) {
 			return;
 		}
