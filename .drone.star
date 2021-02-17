@@ -1322,7 +1322,7 @@ def fixPermissions(phpVersion, federatedServerNeeded):
 def owncloudLog(server):
 	return [{
 		'name': 'owncloud-log-%s' % server,
-		'image': 'owncloud/ubuntu:18.04',
+		'image': 'owncloud/ubuntu:20.04',
 		'pull': 'always',
 		'detach': True,
 		'commands': [
