@@ -22,6 +22,7 @@
 
 namespace OCA\QNAP\Command;
 
+use OCA\QNAP\QnapLicense;
 use OCP\IConfig;
 use OCP\IGroupManager;
 use OCP\IL10N;
@@ -92,14 +93,8 @@ class CheckActiveUsers extends Command {
 	}
 
 	private function getLicensedUsers() : int {
-		$licenseFile = $this->config->getSystemValue('qnap-license-file', '');
-		if (\file_exists($licenseFile)) {
-			$license = \file_get_contents($licenseFile);
-			$json_a = \json_decode($license, true);
-			// how does the structure look like???
-		}
-		// we allow 15 users without a license
-		return 1;
+		$q = new QnapLicense;
+		return $q->getUserAllowance();
 	}
 
 	private function sendEMailToAdmin(OutputInterface $output): void {

@@ -6,46 +6,65 @@ use OC\License\ILicense;
 
 use \DateTime;
 
-class QnapLicense // implements ILicense
-{
-	const LICENSEpath = '/mnt/license/owncloud.json';
+class QnapLicense implements ILicense {
+	const LICENSESpath = '/mnt/licenses/owncloud.json';
 
 	const SKUlist = [
-		"TODO-owncloud-sku",
+		"TODO-owncloud-sku", // TODO: change to ownCloud sku
 	];
+
+	const MinUserAllowance = 5;
 
 	const TIMEformat = 'Y-m-d H:i:s.u';
 
-	private $license = null;
-	private $licenseInfo = null;
+	private $licenses = null;
 
 	public function __construct() {
-		$this->loadLicense();
+		$this->loadLicensesFile();
 	}
 
-	private function loadLicense() {
-		$licenseFile = \file_get_contents(self::LICENSEpath);
-		if ($licenseFile === false) {
+	private function loadLicensesFile() {
+		$licensesFile = \file_get_contents(self::LICENSESpath);
+		if ($licensesFile === false) {
 			return;
 		}
-		$cmdOutput = \json_decode($licenseFile, true);
+		$cmdOutput = \json_decode($licensesFile, true);
 		if ($cmdOutput === null) {
 			return;
 		}
 
-		$this->license = $cmdOutput['result'];
-		if ($this->license === null) {
+		if (!\array_key_exists('result', $cmdOutput)) {
 			return;
 		}
 
-		$licenseInfoStr = $this->license['license_info_json_str'];
+		$this->licenses = $cmdOutput['result'];
+		if ($this->licenses === null) {
+			return;
+		}
+
+		foreach ($this->licenses as &$license) {
+			$this->parseLicenseInfo($license);
+		}
+
+		// debug print all licenses after processing
+		//echo json_encode($this->licenses, JSON_PRETTY_PRINT);
+	}
+
+	private function parseLicenseInfo(&$license) {
+		if (!\array_key_exists('license_info_json_str', $license)) {
+			return;
+		}
+		$licenseInfoStr = $license['license_info_json_str'];
 		if ($licenseInfoStr === null) {
 			return;
 		}
-		$this->licenseInfo = \json_decode($licenseInfoStr, true);
-		if ($this->licenseInfo === null) {
+		$licenseInfo = \json_decode($licenseInfoStr, true);
+		if ($licenseInfo === null) {
 			return;
 		}
+
+		$license['license_info'] = $licenseInfo;
+		unset($license['license_info_json_str']);
 	}
 
 	public function getLicenseString(): string {
@@ -53,15 +72,24 @@ class QnapLicense // implements ILicense
 	}
 
 	public function isValid(): bool {
-		if ($this->licenseInfo === null) {
+		foreach ($this->licenses as &$license) {
+			if ($this->isLicenseValid($license)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private function isLicenseValid(&$license): bool {
+		if (!\array_key_exists('license_info', $license)) {
 			return false;
 		}
 
-		if (!\in_array($this->licenseInfo['sku'], self::SKUlist)) {
+		if (!\in_array($license['license_info']['sku'], self::SKUlist)) {
 			return false;
 		}
 
-		$validFrom = DateTime::createFromFormat(self::TIMEformat, $this->licenseInfo['valid_from']);
+		$validFrom = DateTime::createFromFormat(self::TIMEformat, $license['license_info']['valid_from']);
 
 		if (!$validFrom instanceof DateTime) {
 			return false;
@@ -69,7 +97,7 @@ class QnapLicense // implements ILicense
 
 		$now = (new DateTime('NOW'))->getTimestamp();
 
-		if ($now > $this->getExpirationTime() || $validFrom->getTimestamp() > $now) {
+		if ($now > $this->getLicenseExpirationTime($license) || $validFrom->getTimestamp() > $now) {
 			return false;
 		}
 
@@ -77,16 +105,59 @@ class QnapLicense // implements ILicense
 	}
 
 	public function getExpirationTime(): int {
-		if ($this->licenseInfo == null) {
+		$expirations = [];
+		foreach ($this->licenses as &$license) {
+			if ($this->isLicenseValid($license)) {
+				$expirations[] = $this->getLicenseExpirationTime($license);
+			}
+		}
+
+		if (\count($expirations) > 0) {
+			return \min($expirations);
+		}
+		return 0;
+	}
+
+	private function getLicenseExpirationTime(&$license): int {
+		if (!\array_key_exists('license_info', $license)) {
 			return 0;
 		}
 
-		$validUntil = DateTime::createFromFormat(self::TIMEformat, $this->licenseInfo['valid_until']);
+		$validUntil = DateTime::createFromFormat(self::TIMEformat, $license['license_info']['valid_until']);
 		if (!$validUntil instanceof DateTime) {
 			return 0;
 		}
 
 		return $validUntil->getTimestamp();
+	}
+
+	public function getUserAllowance(): int {
+		$allowance = 0;
+		foreach ($this->licenses as &$license) {
+			if ($this->isLicenseValid($license)) {
+				$allowance = +$this->getLicenseUserAllowance($license);
+			}
+		}
+		return \max($allowance, self::MinUserAllowance);
+	}
+
+	private function getLicenseUserAllowance(&$license): int {
+		if (!\array_key_exists('license_info', $license)) {
+			return 0;
+		}
+		if (!\array_key_exists('attributes', $license['license_info'])) {
+			return 0;
+		}
+		if (!\array_key_exists('owncloud_account', $license['license_info']['attributes'])) {
+			return 0;
+		}
+
+		$userAllowance = $license['license_info']['attributes']['owncloud_account'];
+		if (!\is_int($userAllowance)) {
+			return 0;
+		}
+
+		return $userAllowance;
 	}
 
 	public function getType(): int {
