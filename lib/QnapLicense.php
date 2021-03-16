@@ -95,9 +95,10 @@ class QnapLicense implements ILicense {
 			return false;
 		}
 
-		$now = (new DateTime('NOW'))->getTimestamp();
+		$now = new \DateTime('now', new \DateTimeZone('UTC'));
+		//$now = (new DateTime('NOW'))->getTimestamp();
 
-		if ($now > $this->getLicenseExpirationTime($license) || $validFrom->getTimestamp() > $now) {
+		if ($now->getTimestamp() > $this->getLicenseExpirationTime($license) || $validFrom > $now) {
 			return false;
 		}
 
@@ -161,9 +162,11 @@ class QnapLicense implements ILicense {
 	}
 
 	public function getType(): int {
+
 		if ($this->isValid()) {
 			return self::LICENSE_TYPE_NORMAL;
 		}
 		return self::LICENSE_TYPE_DEMO;
+
 	}
 }
