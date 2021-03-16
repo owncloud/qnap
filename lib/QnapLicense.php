@@ -10,7 +10,7 @@ class QnapLicense implements ILicense {
 	const LICENSESpath = '/mnt/licenses/owncloud.json';
 
 	const SKUlist = [
-		"TODO-owncloud-sku", // TODO: change to ownCloud sku
+		"LS-OWNCLOUD-5U-1Y-EI",
 	];
 
 	const MinUserAllowance = 5;
@@ -135,7 +135,7 @@ class QnapLicense implements ILicense {
 		$allowance = 0;
 		foreach ($this->licenses as &$license) {
 			if ($this->isLicenseValid($license)) {
-				$allowance = +$this->getLicenseUserAllowance($license);
+				$allowance = $allowance + $this->getLicenseUserAllowance($license);
 			}
 		}
 		return \max($allowance, self::MinUserAllowance);
@@ -153,7 +153,7 @@ class QnapLicense implements ILicense {
 		}
 
 		$userAllowance = $license['license_info']['attributes']['owncloud_account'];
-		if (!\is_int($userAllowance)) {
+		if (!\is_numeric($userAllowance)) {
 			return 0;
 		}
 
