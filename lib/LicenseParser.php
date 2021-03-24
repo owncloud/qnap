@@ -51,18 +51,20 @@ class LicenseParser {
 			$license['valid_from'] = $validFrom;
 			$license['valid_until'] = $validUntil;
 
+			$r['license_info'] = $license;
+
 			# future license
 			if ($validFrom->getTimestamp() > $now) {
-				$this->futureLicenses[]= $license;
+				$this->futureLicenses[]= $r;
 				continue;
 			}
 			# expired licenses
 			if ($this->timeFactory->getTime() > $validUntil->getTimestamp()) {
-				$this->expiredLicenses[]= $license;
+				$this->expiredLicenses[]= $r;
 				continue;
 			}
 			# active licenses
-			$this->activeLicenses[]= $license;
+			$this->activeLicenses[]= $r;
 		}
 	}
 
@@ -79,7 +81,7 @@ class LicenseParser {
 		if (!empty($this->activeLicenses)) {
 			$expirations = \array_map(function ($l) {
 				/** @var \DateTime $validUntil */
-				$validUntil = $l['valid_until'];
+				$validUntil = $l['license_info']['valid_until'];
 				return $validUntil->getTimestamp();
 			}, $this->activeLicenses);
 			return \min($expirations);
@@ -88,7 +90,7 @@ class LicenseParser {
 		if (!empty($this->expiredLicenses)) {
 			$expirations = \array_map(function ($l) {
 				/** @var \DateTime $validUntil */
-				$validUntil = $l['valid_until'];
+				$validUntil = $l['license_info']['valid_until'];
 				return $validUntil->getTimestamp();
 			}, $this->expiredLicenses);
 			return \min($expirations);
@@ -107,6 +109,10 @@ class LicenseParser {
 	}
 
 	private function getLicenseUserAllowance($license): int {
-		return (int)($license['attributes']['owncloud_account'] ?? 0);
+		return (int)($license['license_info']['attributes']['owncloud_account'] ?? 0);
+	}
+
+	public function getLicenses(): array {
+		return \array_merge($this->activeLicenses, $this->expiredLicenses, $this->futureLicenses);
 	}
 }

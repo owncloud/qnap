@@ -21,6 +21,9 @@
         <license/>
         <prevent_group_restriction/>
     </types>
+    <settings>
+        <admin>OCA\QNAP\AdminPanel</admin>
+    </settings>
     <commands>
         <command>OCA\QNAP\Command\CheckActiveUsers</command>
     </commands>
