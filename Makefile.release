@@ -20,7 +20,7 @@ app_name=qnap
 build_dir=$(CURDIR)/build
 dist_dir=$(build_dir)/dist
 src_files=README.md LICENSE
-src_dirs=appinfo img lib vendor
+src_dirs=appinfo img lib vendor templates
 all_src=$(src_dirs) $(src_files)
 
 occ=$(CURDIR)/../../occ
