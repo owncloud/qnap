@@ -8,7 +8,7 @@ use OCP\Template;
 
 class AdminPanel implements ISettings {
 	public function getPriority() {
-		return 10;
+		return 17;
 	}
 
 	public function getPanel() {
@@ -24,7 +24,7 @@ class AdminPanel implements ISettings {
 	}
 
 	public function getSectionID() {
-		return 'security';
+		return 'general';
 	}
 
 	private function getUserCount(): int {
