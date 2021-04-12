@@ -3,7 +3,7 @@
 /** @var \OCP\IL10N $l */
 ?>
 <div id="qnap" class="section">
-<h2 class="inlineblock"><?php p($l->t('QNAP License')); ?></h2>
+<h2 class="inlineblock"><?php p($l->t('ownCloud License on QNAP')); ?></h2>
 <p>
 	<?php p($l->t('Active users: %d', $_['active_users']))?>
 	<br>
