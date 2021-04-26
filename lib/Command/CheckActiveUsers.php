@@ -23,12 +23,13 @@
 namespace OCA\QNAP\Command;
 
 use OCA\QNAP\QnapLicense;
-use OCP\IConfig;
 use OCP\IGroupManager;
 use OCP\IL10N;
+use OCP\IURLGenerator;
 use OCP\IUser;
 use OCP\IUserManager;
 use OCP\Mail\IMailer;
+use OCP\Notification\IManager;
 use OCP\Template;
 use OCP\Util;
 use Symfony\Component\Console\Command\Command;
@@ -54,18 +55,24 @@ class CheckActiveUsers extends Command {
 
 	/** @var int */
 	private $numberOfActiveUsers = 0;
-	/**
-	 * @var IConfig
-	 */
-	private $config;
 
-	public function __construct(IUserManager $userManager, IMailer $mailer, IL10N $l10n, IGroupManager $groupManager, IConfig $config) {
+	/**
+	 * @var IManager
+	 */
+	private $notificationManager;
+	/**
+	 * @var IURLGenerator
+	 */
+	private $urlGenerator;
+
+	public function __construct(IUserManager $userManager, IMailer $mailer, IL10N $l10n, IGroupManager $groupManager, IManager $notificationManager, IURLGenerator $urlGenerator) {
 		parent::__construct();
 		$this->userManager = $userManager;
 		$this->mailer = $mailer;
 		$this->l10n = $l10n;
 		$this->groupManager = $groupManager;
-		$this->config = $config;
+		$this->notificationManager = $notificationManager;
+		$this->urlGenerator = $urlGenerator;
 	}
 
 	protected function configure() {
@@ -86,6 +93,7 @@ class CheckActiveUsers extends Command {
 			}
 			return 0;
 		}
+		$this->sendNotification($output);
 		$this->sendEMailToAdmin($output);
 		$this->disableExceededUsers($output, $licensedUsers);
 
@@ -167,5 +175,23 @@ class CheckActiveUsers extends Command {
 		}
 
 		return $recipients;
+	}
+
+	private function sendNotification(OutputInterface $output): void {
+		$link = $this->urlGenerator->linkTo('', 'index.php/settings/admin?sectionid=general');
+
+		$time = \time();
+		foreach ($this->adminUsers as $a) {
+			$rnd = \random_int(PHP_INT_MIN, PHP_INT_MAX);
+			$notification = $this->notificationManager->createNotification();
+			$notification->setApp('qnap');
+			$notification->setObject('qnap', "$time-$rnd");
+			$notification->setUser($a->getUserName());
+			$notification->setLink($link);
+			$notification->setSubject('qnap-license-exceeded');
+			$notification->setDateTime(new \DateTime());
+
+			$this->notificationManager->notify($notification);
+		}
 	}
 }
