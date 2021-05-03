@@ -22,9 +22,9 @@
 p($l->t('Dear ownCloud - Admin,'));
 print_unescaped("\n");
 print_unescaped("\n");
-p($l->t('unfortunately, you exceeded the maximum number of users within your current license.'));
+p($l->t('The maximum user limit was exceeded.'));
 print_unescaped("\n");
-p($l->t('To upgrade the number of users please visit: https://software.qnap.com/owncloud.html'));
+p($l->t('To add more users, purchase a license from https://software.qnap.com/owncloud.html'));
 print_unescaped("\n");
 print_unescaped("\n");
 // TRANSLATORS term at the end of a mail
