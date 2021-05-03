@@ -116,11 +116,11 @@ class CheckActiveUsers extends Command {
 		// send it out now
 		$message = $this->mailer->createMessage();
 		$message->setTo($recipients);
-		$message->setSubject((string) $this->l10n->t('Action Required: Your ownCloud User Licenses are exceeded'));
+		$message->setSubject((string) $this->l10n->t('Action Required: Your ownCloud licenses\' user limit was exceeded'));
 		$message->setPlainBody($plainBody);
 		$message->setFrom([
 			Util::getDefaultEmailAddress('qnap-noreply') =>
-				(string)$this->l10n->t('[Dummy] License Control'),
+				(string)$this->l10n->t('ownCloud on QNAP'),
 		]);
 		try {
 			$this->mailer->send($message);
