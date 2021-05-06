@@ -13,10 +13,11 @@
 </p>
 
 <h3><?php p($l->t('License Overview')); ?></h3>
-<table>
+<table class="grid">
 	<thead>
 	<tr>
 		<th scope="col"><?php p($l->t('License ID')); ?></th>
+		<th scope="col"><?php p($l->t('Valid from')); ?></th>
 		<th scope="col"><?php p($l->t('Valid until')); ?></th>
 		<th scope="col"><?php p($l->t('Number of users')); ?></th>
 	</tr>
@@ -25,6 +26,7 @@
 	<?php foreach ($_['licenses'] as $lic): ?>
 		<tr>
 			<td><?php p($lic['license_id']); ?></td>
+			<td><?php p($lic['license_info']['valid_from']->format(\DateTime::COOKIE)); ?></td>
 			<td><?php p($lic['license_info']['valid_until']->format(\DateTime::COOKIE)); ?></td>
 			<td><?php p($lic['license_info']['attributes']['owncloud_account']); ?></td>
 		</tr>
