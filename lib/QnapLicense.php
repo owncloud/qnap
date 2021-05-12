@@ -5,16 +5,15 @@ namespace OCA\QNAP;
 use OC\License\ILicense;
 
 class QnapLicense implements ILicense {
-	public const LICENSE_PATH = '/mnt/licenses/owncloud.json';
 
 	/**
 	 * @var LicenseParser
 	 */
 	private $licenseParser;
 
-	public function __construct() {
+	public function __construct(string $licenseKey) {
 		$this->licenseParser = new LicenseParser(\OC::$server->getTimeFactory());
-		$this->licenseParser->loadLicensesFile(self::LICENSE_PATH);
+		$this->licenseParser->loadLicensesText($licenseKey);
 	}
 
 	public function getLicenseString(): string {

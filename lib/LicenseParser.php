@@ -22,14 +22,6 @@ class LicenseParser {
 		$this->timeFactory = $timeFactory;
 	}
 
-	public function loadLicensesFile(string $filePath): void {
-		$licensesFileContents = \file_get_contents($filePath);
-		if ($licensesFileContents === false) {
-			return;
-		}
-		$this->loadLicensesText($licensesFileContents);
-	}
-
 	public function loadLicensesText(string $licenseText): void {
 		$cmdOutput = \json_decode($licenseText, true);
 		if ($cmdOutput === null) {
