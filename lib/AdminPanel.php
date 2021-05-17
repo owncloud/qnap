@@ -12,15 +12,21 @@ class AdminPanel implements ISettings {
 	}
 
 	public function getPanel() {
-		$license = new QnapLicense();
-		$tmpl = new Template('qnap', 'settings-admin');
-		$tmpl->assign('licenses', $license->getLicenses());
-		$tmpl->assign('licensed_users', $license->getUserAllowance());
-		$tmpl->assign('active_users', $this->getUserCount());
-#		foreach ($params as $key => $value) {
-#			$tmpl->assign($key, $value);
-#		}
-		return $tmpl;
+		$licenseManager = \OC::$server->getLicenseManager();
+		try {
+			$classname = $licenseManager->askLicenseFor('core', 'getLicenseClass');
+			$isQNAP = $classname === QnapLicense::class;
+		} catch (LicenseManagerException $ex) {
+			$isQNAP = false;
+		}
+		if ($isQNAP) {
+			$tmpl = new Template('qnap', 'settings-admin');
+			$tmpl->assign('licenses', $licenseManager->askLicenseFor('core', 'getLicenses'));
+			$tmpl->assign('licensed_users', $licenseManager->askLicenseFor('core', 'getUserAllowance'));
+			$tmpl->assign('active_users', $this->getUserCount());
+			return $tmpl;
+		}
+		return null;
 	}
 
 	public function getSectionID() {

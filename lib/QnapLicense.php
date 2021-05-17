@@ -2,9 +2,9 @@
 
 namespace OCA\QNAP;
 
-use OC\License\ILicense;
+use OCP\License\AbstractLicense;
 
-class QnapLicense implements ILicense {
+class QnapLicense extends AbstractLicense {
 
 	/**
 	 * @var LicenseParser
@@ -17,7 +17,7 @@ class QnapLicense implements ILicense {
 	}
 
 	public function getLicenseString(): string {
-		return 'qnap-license';
+		return ''; // license is stored by ownCloud not by QnapLicense
 	}
 
 	public function isValid(): bool {
