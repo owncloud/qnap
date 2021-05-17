@@ -20,14 +20,18 @@ class AdminPanel implements ISettings {
 		} catch (LicenseManagerException $ex) {
 			$isQNAP = false;
 		}
+
+		$tmpl = new Template('qnap', 'settings-admin');
 		if ($isQNAP) {
-			$tmpl = new Template('qnap', 'settings-admin');
 			$tmpl->assign('licenses', $licenseManager->askLicenseFor('core', 'getLicenses'));
 			$tmpl->assign('licensed_users', $licenseManager->askLicenseFor('core', 'getUserAllowance'));
-			$tmpl->assign('active_users', $this->getUserCount());
-			return $tmpl;
+		} else {
+			$tmpl->assign('licenses', []);
+			$license = new QnapLicense('');
+			$tmpl->assign('licensed_users', $license->getUserAllowance());
 		}
-		return null;
+		$tmpl->assign('active_users', $this->getUserCount());
+		return $tmpl;
 	}
 
 	public function getSectionID() {
