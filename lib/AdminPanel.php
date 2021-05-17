@@ -5,6 +5,7 @@ namespace OCA\QNAP;
 use OCP\IUser;
 use OCP\Settings\ISettings;
 use OCP\Template;
+use OCP\License\Exceptions\LicenseManagerException;
 
 class AdminPanel implements ISettings {
 	public function getPriority() {
