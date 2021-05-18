@@ -23,12 +23,16 @@ class LicenseParser {
 	}
 
 	public function loadLicensesText(string $licenseText): void {
-		$cmdOutput = \json_decode($licenseText, true);
-		if ($cmdOutput === null) {
+
+		$licensesString = \base64_decode($licenseText, true);
+		if ($licensesString === false) {
 			return;
 		}
 
-		$licenses = $cmdOutput['result'] ?? [];
+		$licenses = \json_decode($licensesString, true);
+		if ($licenses === null) {
+			return;
+		}
 
 		$now = $this->timeFactory->getTime();
 		foreach ($licenses as $r) {
