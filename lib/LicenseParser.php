@@ -59,6 +59,10 @@ class LicenseParser {
 				$this->expiredLicenses[]= $r;
 				continue;
 			}
+			if ($r['status'] !== "valid") {
+				$this->expiredLicenses[]= $r;
+				continue;
+			}
 			# active licenses
 			$this->activeLicenses[]= $r;
 		}

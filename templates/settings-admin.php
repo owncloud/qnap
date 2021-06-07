@@ -20,6 +20,7 @@
 		<th scope="col"><?php p($l->t('Valid from')); ?></th>
 		<th scope="col"><?php p($l->t('Valid until')); ?></th>
 		<th scope="col"><?php p($l->t('Number of users')); ?></th>
+		<th scope="col"><?php p($l->t('Status')); ?></th>
 	</tr>
 	</thead>
 	<tbody>
@@ -29,6 +30,7 @@
 			<td><?php p($lic['license_info']['valid_from']->format(\DateTime::COOKIE)); ?></td>
 			<td><?php p($lic['license_info']['valid_until']->format(\DateTime::COOKIE)); ?></td>
 			<td><?php p($lic['license_info']['attributes']['owncloud_account']); ?></td>
+			<td><?php p($lic['status']); ?></td>
 		</tr>
 	<?php endforeach ?>
 	</tbody>
