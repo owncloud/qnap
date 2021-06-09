@@ -101,7 +101,7 @@ class CheckActiveUsers extends Command {
 	}
 
 	private function getLicensedUsers() : int {
-		$q = new QnapLicense;
+		$q = new QnapLicense('');
 		return $q->getUserAllowance();
 	}
 
