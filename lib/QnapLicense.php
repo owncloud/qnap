@@ -43,4 +43,8 @@ class QnapLicense implements ILicense {
 	public function getLicenses(): array {
 		return $this->licenseParser->getLicenses();
 	}
+
+	public function getProtectedMethods(): array {
+		return ['getLicenseString'];
+	}
 }
