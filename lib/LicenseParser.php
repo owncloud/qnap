@@ -23,7 +23,6 @@ class LicenseParser {
 	}
 
 	public function loadLicensesText(string $licenseText): void {
-
 		$licensesString = \base64_decode($licenseText, true);
 		if ($licensesString === false) {
 			return;
