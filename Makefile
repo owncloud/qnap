@@ -51,6 +51,15 @@ clean-composer-deps:
 dev: ## Initialize dev environment
 dev: install-deps
 
+#
+# Release
+# make this app compatible with the ownCloud
+# default build tools
+#
+.PHONY: dist
+dist:
+	make -f Makefile.release dist
+
 $(KARMA): $(nodejs_deps)
 
 ##
