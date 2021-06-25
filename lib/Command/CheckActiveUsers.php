@@ -36,6 +36,7 @@ use OCP\Util;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use OCP\License\Exceptions\LicenseManagerException;
 
 class CheckActiveUsers extends Command {
 
@@ -83,6 +84,7 @@ class CheckActiveUsers extends Command {
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$this->prepare();
+
 		$licensedUsers = $this->getLicensedUsers();
 		if ($output->isVerbose()) {
 			$output->writeln("After preparation: {$this->numberOfActiveUsers} active users, $licensedUsers licensed users");
@@ -102,8 +104,19 @@ class CheckActiveUsers extends Command {
 	}
 
 	private function getLicensedUsers() : int {
-		$q = new QnapLicense('');
-		return $q->getUserAllowance();
+		$licenseManager = \OC::$server->getLicenseManager();
+		try {
+			$classname = $licenseManager->askLicenseFor('core', 'getLicenseClass');
+			$isQNAP = $classname === QnapLicense::class;
+		} catch (LicenseManagerException $ex) {
+			$isQNAP = false;
+		}
+
+		if ($isQNAP) {
+			return $licenseManager->askLicenseFor('core', 'getUserAllowance');
+		}
+		$license = new QnapLicense('');
+		return $license->getUserAllowance();
 	}
 
 	private function sendEMailToAdmin(OutputInterface $output): void {
@@ -140,18 +153,13 @@ class CheckActiveUsers extends Command {
 		}
 		$activeUsers = 0;
 		$this->userManager->callForAllUsers(static function (IUser $user) use (&$activeUsers, $licensedUsers, $userTypeHelper, $output) {
-			$isGuest = false;
-			if ($user->isEnabled()) {
-				if ($userTypeHelper->isGuestUser($user->getUID()) === true) {
-					$isGuest = true;
-				} else {
-					$activeUsers++;
-				}
-			}
-			if (!$isGuest && ($activeUsers > $licensedUsers)) {
-				$user->setEnabled(false);
-				if ($output->isVerbose()) {
-					$output->writeln($user->getUID());
+			if ($user->isEnabled() && $userTypeHelper->isGuestUser($user->getUID()) === false) {
+				$activeUsers++;
+				if ($activeUsers > $licensedUsers) {
+					$user->setEnabled(false);
+					if ($output->isVerbose()) {
+						$output->writeln($user->getUID());
+					}
 				}
 			}
 		});
@@ -162,10 +170,8 @@ class CheckActiveUsers extends Command {
 	private function prepare() :void {
 		$userTypeHelper = new UserTypeHelper();
 		$this->userManager->callForAllUsers(function (IUser $user) use ($userTypeHelper) {
-			if ($user->isEnabled()) {
-				if ($userTypeHelper->isGuestUser($user->getUID()) === false) {
-					$this->numberOfActiveUsers++;
-				}
+			if ($user->isEnabled() && $userTypeHelper->isGuestUser($user->getUID()) === false) {
+				$this->numberOfActiveUsers++;
 			}
 			if ($this->groupManager->isAdmin($user->getUID())) {
 				$this->adminUsers[]= $user;
