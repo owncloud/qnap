@@ -9,7 +9,13 @@
 	<br>
 	<?php p($l->t('Licensed users: %d', $_['licensed_users']))?>
 	<br>
+	<?php p($l->t('Active guest users: %d', $_['active_guest_users']))?>
+	<br>
+	<?php p($l->t('Licensed guest users: unlimited'))?>
+	<br>
+	<br>
 	<a href="https://software.qnap.com/owncloud.html"><?php p($l->t('Visit the QNAP Store to purchase more licenses.')) ?></a>
+	<br>
 </p>
 
 <h3><?php p($l->t('License Overview')); ?></h3>

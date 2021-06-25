@@ -22,6 +22,7 @@
 
 namespace OCA\QNAP\Command;
 
+use OC\Helper\UserTypeHelper;
 use OCA\QNAP\QnapLicense;
 use OCP\IGroupManager;
 use OCP\IL10N;
@@ -133,15 +134,21 @@ class CheckActiveUsers extends Command {
 	}
 
 	private function disableExceededUsers(OutputInterface $output, int $licensedUsers): int {
+		$userTypeHelper = new UserTypeHelper();
 		if ($output->isVerbose()) {
 			$output->writeln('Disabling user without license:');
 		}
 		$activeUsers = 0;
-		$this->userManager->callForAllUsers(static function (IUser $user) use (&$activeUsers, $licensedUsers, $output) {
+		$this->userManager->callForAllUsers(static function (IUser $user) use (&$activeUsers, $licensedUsers, $userTypeHelper, $output) {
+			$isGuest = false;
 			if ($user->isEnabled()) {
-				$activeUsers++;
+				if ($userTypeHelper->isGuestUser($user->getUID()) === true) {
+					$isGuest = true;
+				} else {
+					$activeUsers++;
+				}
 			}
-			if ($activeUsers > $licensedUsers) {
+			if (!$isGuest && ($activeUsers > $licensedUsers)) {
 				$user->setEnabled(false);
 				if ($output->isVerbose()) {
 					$output->writeln($user->getUID());
@@ -153,9 +160,12 @@ class CheckActiveUsers extends Command {
 	}
 
 	private function prepare() :void {
-		$this->userManager->callForAllUsers(function (IUser $user) {
+		$userTypeHelper = new UserTypeHelper();
+		$this->userManager->callForAllUsers(function (IUser $user) use ($userTypeHelper) {
 			if ($user->isEnabled()) {
-				$this->numberOfActiveUsers++;
+				if ($userTypeHelper->isGuestUser($user->getUID()) === false) {
+					$this->numberOfActiveUsers++;
+				}
 			}
 			if ($this->groupManager->isAdmin($user->getUID())) {
 				$this->adminUsers[]= $user;

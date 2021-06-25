@@ -2,6 +2,7 @@
 
 namespace OCA\QNAP;
 
+use OC\Helper\UserTypeHelper;
 use OCP\IUser;
 use OCP\Settings\ISettings;
 use OCP\Template;
@@ -31,6 +32,7 @@ class AdminPanel implements ISettings {
 			$tmpl->assign('licensed_users', $license->getUserAllowance());
 		}
 		$tmpl->assign('active_users', $this->getUserCount());
+		$tmpl->assign('active_guest_users', $this->getGuestUserCount());
 		return $tmpl;
 	}
 
@@ -46,6 +48,21 @@ class AdminPanel implements ISettings {
 			}
 		});
 
-		return $numberOfActiveUsers;
+		return $numberOfActiveUsers - $this->getGuestUserCount();
+	}
+
+	private function getGuestUserCount(): int {
+		$userTypeHelper = new UserTypeHelper();
+
+		$numberOfActiveGuestUsers = 0;
+		\OC::$server->getUserManager()->callForAllUsers(function (IUser $user) use (&$numberOfActiveGuestUsers, $userTypeHelper) {
+			if ($user->isEnabled()) {
+				if ($userTypeHelper->isGuestUser($user->getUID()) === true) {
+					$numberOfActiveGuestUsers++;
+				}
+			}
+		});
+
+		return $numberOfActiveGuestUsers;
 	}
 }
