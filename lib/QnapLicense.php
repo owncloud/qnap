@@ -5,6 +5,7 @@ namespace OCA\QNAP;
 use OCP\License\AbstractLicense;
 
 class QnapLicense extends AbstractLicense {
+	public const MIN_USER_ALLOWANCE = 5;
 
 	/**
 	 * @var LicenseParser
@@ -17,7 +18,7 @@ class QnapLicense extends AbstractLicense {
 	}
 
 	public function getLicenseString(): string {
-		return ''; // license is stored by ownCloud not by QnapLicense
+		return 'qnap-license'; // license is stored by ownCloud not by QnapLicense
 	}
 
 	public function isValid(): bool {
@@ -29,7 +30,7 @@ class QnapLicense extends AbstractLicense {
 	}
 
 	public function getUserAllowance(): int {
-		return $this->licenseParser->getUserAllowance();
+		return \max($this->licenseParser->getUserAllowance(), self::MIN_USER_ALLOWANCE);
 	}
 
 	public function getType(): int {

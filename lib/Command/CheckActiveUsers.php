@@ -115,8 +115,7 @@ class CheckActiveUsers extends Command {
 		if ($isQNAP) {
 			return $licenseManager->askLicenseFor('core', 'getUserAllowance');
 		}
-		$license = new QnapLicense('');
-		return $license->getUserAllowance();
+		return QnapLicense::MIN_USER_ALLOWANCE;
 	}
 
 	private function sendEMailToAdmin(OutputInterface $output): void {

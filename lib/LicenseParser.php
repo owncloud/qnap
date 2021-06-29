@@ -5,8 +5,6 @@ namespace OCA\QNAP;
 use OCP\AppFramework\Utility\ITimeFactory;
 
 class LicenseParser {
-	public const MIN_USER_ALLOWANCE = 5;
-
 	public const DATETIME_FORMAT = 'Y-m-d H:i:s.u';
 
 	private $activeLicenses = [];
@@ -104,7 +102,7 @@ class LicenseParser {
 		foreach ($this->activeLicenses as $license) {
 			$allowance += $this->getLicenseUserAllowance($license);
 		}
-		return \max($allowance, self::MIN_USER_ALLOWANCE);
+		return $allowance;
 	}
 
 	private function getLicenseUserAllowance($license): int {

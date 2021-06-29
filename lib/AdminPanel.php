@@ -28,8 +28,7 @@ class AdminPanel implements ISettings {
 			$tmpl->assign('licensed_users', $licenseManager->askLicenseFor('core', 'getUserAllowance'));
 		} else {
 			$tmpl->assign('licenses', []);
-			$license = new QnapLicense('');
-			$tmpl->assign('licensed_users', $license->getUserAllowance());
+			$tmpl->assign('licensed_users', QnapLicense::MIN_USER_ALLOWANCE);
 		}
 		$tmpl->assign('active_users', $this->getUserCount());
 		$tmpl->assign('active_guest_users', $this->getGuestUserCount());
