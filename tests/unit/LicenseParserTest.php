@@ -21,7 +21,7 @@ class LicenseParserTest extends TestCase {
 	 * @param string $licenseStr
 	 */
 	public function test(bool $expectedValid, int $expectedUsers, int $expectedExpiration, string $licenseStr): void {
-		$this->parser->loadLicensesText(\base64_encode($licenseStr));
+		$this->parser->loadLicensesText($licenseStr);
 
 		self::assertEquals($expectedValid, $this->parser->isValid());
 		self::assertEquals($expectedUsers, $this->parser->getUserAllowance());
@@ -159,7 +159,7 @@ class LicenseParserTest extends TestCase {
 			];
 		}
 
-		return \json_encode($licenses);
+		return \base64_encode(\json_encode($licenses));
 	}
 
 	protected function setUp(): void {
