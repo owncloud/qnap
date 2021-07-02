@@ -4,11 +4,15 @@ namespace OCA\QNAP\Tests\Unit;
 
 use OCA\QNAP\QnapLicense;
 use OCA\QNAP\LicenseParser;
-use OCP\AppFramework\Utility\ITimeFactory;
 use Test\TestCase;
 
 class QnapLicenseTest extends TestCase {
 
+	/**
+	 * @var QnapLicense
+	 */
+	private $license;
+	
 	/**
 	 * @var LicenseParser
 	 */
@@ -22,20 +26,12 @@ class QnapLicenseTest extends TestCase {
 	 * @param string $licenseStr
 	 */
 	public function test(bool $givenValid, int $givenUsers, bool $expectedValid, int $expectedUsers, int $expectedType): void {
-		$ref = new \ReflectionClass('OCA\QNAP\QnapLicense');
-
-		$license = new QnapLicense('');
-
 		$this->parser->method('isValid')->willReturn($givenValid);
 		$this->parser->method('getUserAllowance')->willReturn($givenUsers);
 
-		$p = $ref->getProperty('licenseParser');
-		$p->setAccessible(true);
-		$p->setValue($license, $this->parser);
-
-		self::assertEquals($expectedValid, $license->isValid());
-		self::assertEquals($expectedType, $license->getType());
-		self::assertEquals($expectedUsers, $license->getUserAllowance());
+		self::assertEquals($expectedValid, $this->license->isValid());
+		self::assertEquals($expectedType, $this->license->getType());
+		self::assertEquals($expectedUsers, $this->license->getUserAllowance());
 	}
 
 	public function providesLicenses(): array {
@@ -57,6 +53,11 @@ class QnapLicenseTest extends TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
+		$ref = new \ReflectionClass('OCA\QNAP\QnapLicense');
+		$this->license = new QnapLicense('');
 		$this->parser = $this->createMock(LicenseParser::class);
+		$p = $ref->getProperty('licenseParser');
+		$p->setAccessible(true);
+		$p->setValue($this->license, $this->parser);
 	}
 }
