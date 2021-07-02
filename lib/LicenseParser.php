@@ -65,10 +65,6 @@ class LicenseParser {
 		}
 	}
 
-	public function getLicenseString(): string {
-		return 'qnap-license';
-	}
-
 	public function isValid(): bool {
 		return !empty($this->activeLicenses);
 	}

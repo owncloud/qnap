@@ -12,11 +12,46 @@ class QnapLicenseTest extends TestCase {
 	 * @var QnapLicense
 	 */
 	private $license;
-	
+
 	/**
 	 * @var LicenseParser
 	 */
 	private $parser;
+
+
+	public function testGetExpirationTime(): void
+    {
+		$this->parser->method('getExpirationTime')->willReturn(1616059559);
+        self::assertEquals(1616059559, $this->license->getExpirationTime());
+    }
+
+	public function testGetLicenseString(): void
+    {
+        self::assertEquals("qnap-license", $this->license->getLicenseString());
+    }
+
+
+	// TODO: why does this create a "Failed asserting that true is false."???
+	/* public function testIsValid(): void
+    {	
+		$this->parser->method('isValid')->willReturn(true);
+        self::assertTrue($this->license->isValid());
+
+		$this->parser->method('isValid')->willReturn(false);
+        self::assertFalse($this->license->isValid());
+    } */
+
+	public function getUserAllowance(): void
+	{
+		$this->parser->method('getUserAllowance')->willReturn(0);
+        self::assertEquals(5, $this->license->getUserAllowance());
+
+		$this->parser->method('getUserAllowance')->willReturn(5);
+        self::assertEquals(5, $this->license->getUserAllowance());
+
+		$this->parser->method('getUserAllowance')->willReturn(10);
+        self::assertEquals(10, $this->license->getUserAllowance());
+	}
 
 	/**
 	 * @dataProvider providesLicenses
@@ -25,7 +60,7 @@ class QnapLicenseTest extends TestCase {
 	 * @param int $expectedExpiration
 	 * @param string $licenseStr
 	 */
-	public function test(bool $givenValid, int $givenUsers, bool $expectedValid, int $expectedUsers, int $expectedType): void {
+	public function testLicense(bool $givenValid, int $givenUsers, bool $expectedValid, int $expectedUsers, int $expectedType): void {
 		$this->parser->method('isValid')->willReturn($givenValid);
 		$this->parser->method('getUserAllowance')->willReturn($givenUsers);
 
