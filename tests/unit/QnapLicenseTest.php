@@ -46,46 +46,26 @@ class QnapLicenseTest extends TestCase {
 		self::assertEquals(QnapLicense::LICENSE_TYPE_DEMO, $this->license->getType());
 	}
 
-	public function getUserAllowance(): void {
-		$this->parser->method('getUserAllowance')->willReturn(0);
-		self::assertEquals(5, $this->license->getUserAllowance());
-
-		$this->parser->method('getUserAllowance')->willReturn(5);
-		self::assertEquals(5, $this->license->getUserAllowance());
-
-		$this->parser->method('getUserAllowance')->willReturn(10);
-		self::assertEquals(10, $this->license->getUserAllowance());
-	}
-
 	/**
-	 * @dataProvider providesLicenses
-	 * @param bool $expectedValid
-	 * @param int $expectedUsers
-	 * @param int $expectedExpiration
-	 * @param string $licenseStr
+	 * @dataProvider providesUserAllowance
+	 * @param int $expectedUserAllowance
+	 * @param int $givenUsersAllowance
 	 */
-	public function testLicense(bool $givenValid, int $givenUsers, bool $expectedValid, int $expectedUsers, int $expectedType): void {
-		$this->parser->method('isValid')->willReturn($givenValid);
-		$this->parser->method('getUserAllowance')->willReturn($givenUsers);
-
-		self::assertEquals($expectedValid, $this->license->isValid());
-		self::assertEquals($expectedType, $this->license->getType());
-		self::assertEquals($expectedUsers, $this->license->getUserAllowance());
+	public function getUserAllowance(int $expectedUserAllowance, int $givenUsersAllowance): void {
+		$this->parser->method('getUserAllowance')->willReturn($givenUsersAllowance);
+		self::assertEquals($expectedUserAllowance, $this->license->getUserAllowance());
 	}
 
-	public function providesLicenses(): array {
+	public function providesUserAllowance(): array {
 		return [
-			'no license' => [
-				false, 0, false, 5, QnapLicense::LICENSE_TYPE_DEMO,
+			'no licensed users' => [
+				5, 0,
 			],
-			'valid license with 1 users' => [
-				true, 1, true, 5, QnapLicense::LICENSE_TYPE_NORMAL,
+			'5 licensed users' => [
+				5, 5,
 			],
-			'valid license with 5 users' => [
-				true, 5, true, 5, QnapLicense::LICENSE_TYPE_NORMAL,
-			],
-			'valid license with 10 users' => [
-				true, 10, true, 10, QnapLicense::LICENSE_TYPE_NORMAL,
+			'10 licensed users' => [
+				10, 10
 			],
 		];
 	}

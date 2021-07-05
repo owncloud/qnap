@@ -3,20 +3,36 @@
 namespace OCA\QNAP;
 
 use OC\Helper\UserTypeHelper;
+use OC\User\Manager;
 use OCP\IUser;
 use OCP\Settings\ISettings;
+use OCP\License\ILicenseManager;
 use OCP\Template;
 use OCP\License\Exceptions\LicenseManagerException;
 
 class AdminPanel implements ISettings {
+	/**
+	 * @var ILicenseManager
+	 */
+	private $licenseManager;
+
+	/**
+	 * @var Manager
+	 */
+	private $userManager;
+
+	public function __construct() {
+		$this->licenseManager = \OC::$server->getLicenseManager();
+		$this->userManager = \OC::$server->getUserManager();
+	}
+
 	public function getPriority() {
 		return 17;
 	}
 
 	public function getPanel() {
-		$licenseManager = \OC::$server->getLicenseManager();
 		try {
-			$classname = $licenseManager->askLicenseFor('core', 'getLicenseClass');
+			$classname = $this->licenseManager->askLicenseFor('core', 'getLicenseClass');
 			$isQNAP = $classname === QnapLicense::class;
 		} catch (LicenseManagerException $ex) {
 			$isQNAP = false;
@@ -24,8 +40,8 @@ class AdminPanel implements ISettings {
 
 		$tmpl = new Template('qnap', 'settings-admin');
 		if ($isQNAP) {
-			$tmpl->assign('licenses', $licenseManager->askLicenseFor('core', 'getLicenses'));
-			$tmpl->assign('licensed_users', $licenseManager->askLicenseFor('core', 'getUserAllowance'));
+			$tmpl->assign('licenses', $this->licenseManager->askLicenseFor('core', 'getLicenses'));
+			$tmpl->assign('licensed_users', $this->licenseManager->askLicenseFor('core', 'getUserAllowance'));
 		} else {
 			$tmpl->assign('licenses', []);
 			$tmpl->assign('licensed_users', QnapLicense::MIN_USER_ALLOWANCE);
@@ -41,7 +57,7 @@ class AdminPanel implements ISettings {
 
 	private function getUserCount(): int {
 		$numberOfActiveUsers = 0;
-		\OC::$server->getUserManager()->callForAllUsers(function (IUser $user) use (&$numberOfActiveUsers) {
+		$this->userManager->callForAllUsers(function (IUser $user) use (&$numberOfActiveUsers) {
 			if ($user->isEnabled()) {
 				$numberOfActiveUsers++;
 			}
@@ -54,7 +70,7 @@ class AdminPanel implements ISettings {
 		$userTypeHelper = new UserTypeHelper();
 
 		$numberOfActiveGuestUsers = 0;
-		\OC::$server->getUserManager()->callForAllUsers(function (IUser $user) use (&$numberOfActiveGuestUsers, $userTypeHelper) {
+		$this->userManager->callForAllUsers(function (IUser $user) use (&$numberOfActiveGuestUsers, $userTypeHelper) {
 			if ($user->isEnabled()) {
 				if ($userTypeHelper->isGuestUser($user->getUID()) === true) {
 					$numberOfActiveGuestUsers++;
