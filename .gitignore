@@ -1,3 +1,4 @@
+.drone.yml
 .php_cs.cache
 vendor-bin/**/vendor
 vendor-bin/**/composer.lock
