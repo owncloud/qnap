@@ -2,8 +2,8 @@
 
 namespace OCA\QNAP\Tests\Unit;
 
-use OCA\QNAP\QnapLicense;
 use OCA\QNAP\LicenseParser;
+use OCA\QNAP\QnapLicense;
 use Test\TestCase;
 
 class QnapLicenseTest extends TestCase {
@@ -72,7 +72,7 @@ class QnapLicenseTest extends TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
-		$ref = new \ReflectionClass('OCA\QNAP\QnapLicense');
+		$ref = new \ReflectionClass(QnapLicense::class);
 		$this->license = new QnapLicense('');
 		$this->parser = $this->createMock(LicenseParser::class);
 		$p = $ref->getProperty('licenseParser');

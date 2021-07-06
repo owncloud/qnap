@@ -3,42 +3,31 @@
 namespace OCA\QNAP\Tests\Unit;
 
 use OC\Helper\UserTypeHelper;
+use OC\Template\Base as BaseTemplate;
 use OCA\QNAP\AdminPanel;
+use OCA\QNAP\QnapLicense;
 use OCP\IUser;
 use OCP\IUserManager;
 use OCP\License\ILicenseManager;
-use OCP\Template;
 use Test\TestCase;
 
 class AdminPanelTest extends TestCase {
-	/**
-	 * @var AdminPanel
-	 */
+	/** @var AdminPanel */
 	private $panel;
 
-	/**
-	 * @var ILicenseManager
-	 */
+	/** @var ILicenseManager */
 	private $licenseManager;
 
-	/**
-	 * @var IUserManager
-	 */
+	/** @var IUserManager */
 	private $userManager;
 
-	/**
-	 * @var UserTypeHelper
-	 */
+	/** @var UserTypeHelper */
 	private $userTypeHelper;
 
-	/**
-	 * @var array
-	 */
+	/** @var array */
 	private $users;
 
-	/**
-	 * @var array
-	 */
+	/** @var array */
 	private $guestUsers;
 
 	public function testPanelPriority(): void {
@@ -50,7 +39,7 @@ class AdminPanelTest extends TestCase {
 	}
 
 	public function testGetPanel(): void {
-		$tmpl = new \ReflectionClass(Template::class);
+		$tmpl = new \ReflectionClass(BaseTemplate::class);
 		$varsProp = $tmpl->getProperty('vars');
 		$varsProp->setAccessible(true);
 
@@ -87,7 +76,7 @@ class AdminPanelTest extends TestCase {
 		$this->licenseManager->method("askLicenseFor")->will(
 			$this->returnCallback(function ($arg1, $arg2) {
 				if ($arg1 == 'core' && $arg2 == 'getLicenseClass') {
-					return;
+					return QnapLicense::class;
 				} elseif ($arg1 == 'core' && $arg2 == 'getLicenses') {
 					return ["test" => "test"];
 				} elseif ($arg1 == 'core' && $arg2 == 'getUserAllowance') {
