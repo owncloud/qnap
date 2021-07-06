@@ -3,11 +3,11 @@
 namespace OCA\QNAP;
 
 use OC\Helper\UserTypeHelper;
-use OC\User\Manager;
 use OCP\IUser;
 use OCP\Settings\ISettings;
 use OCP\License\ILicenseManager;
 use OCP\Template;
+use OCP\IUserManager;
 use OCP\License\Exceptions\LicenseManagerException;
 
 class AdminPanel implements ISettings {
@@ -17,13 +17,20 @@ class AdminPanel implements ISettings {
 	private $licenseManager;
 
 	/**
-	 * @var Manager
+	 * @var IUserManager
 	 */
 	private $userManager;
 
-	public function __construct() {
-		$this->licenseManager = \OC::$server->getLicenseManager();
-		$this->userManager = \OC::$server->getUserManager();
+	/**
+	 * @var UserTypeHelper
+	 */
+	private $userTypeHelper;
+
+	public function __construct(ILicenseManager $licenseManager, IUserManager $userManager, UserTypeHelper $userTypeHelper) {
+		$this->licenseManager = $licenseManager;
+		$this->userManager = $userManager;
+
+		$this->userTypeHelper = $userTypeHelper;
 	}
 
 	public function getPriority() {
@@ -46,8 +53,8 @@ class AdminPanel implements ISettings {
 			$tmpl->assign('licenses', []);
 			$tmpl->assign('licensed_users', QnapLicense::MIN_USER_ALLOWANCE);
 		}
-		$tmpl->assign('active_users', $this->getUserCount());
-		$tmpl->assign('active_guest_users', $this->getGuestUserCount());
+		$tmpl->assign('active_users', $this->getUserCount()["normal"]);
+		$tmpl->assign('active_guest_users', $this->getUserCount()["guest"]);
 		return $tmpl;
 	}
 
@@ -55,29 +62,18 @@ class AdminPanel implements ISettings {
 		return 'general';
 	}
 
-	private function getUserCount(): int {
+	private function getUserCount(): array {
 		$numberOfActiveUsers = 0;
-		$this->userManager->callForAllUsers(function (IUser $user) use (&$numberOfActiveUsers) {
-			if ($user->isEnabled()) {
-				$numberOfActiveUsers++;
-			}
-		});
-
-		return $numberOfActiveUsers - $this->getGuestUserCount();
-	}
-
-	private function getGuestUserCount(): int {
-		$userTypeHelper = new UserTypeHelper();
-
 		$numberOfActiveGuestUsers = 0;
-		$this->userManager->callForAllUsers(function (IUser $user) use (&$numberOfActiveGuestUsers, $userTypeHelper) {
+		$this->userManager->callForAllUsers(function (IUser $user) use (&$numberOfActiveUsers, &$numberOfActiveGuestUsers) {
 			if ($user->isEnabled()) {
-				if ($userTypeHelper->isGuestUser($user->getUID()) === true) {
+				if ($this->userTypeHelper->isGuestUser($user->getUID()) === true) {
 					$numberOfActiveGuestUsers++;
+				} else {
+					$numberOfActiveUsers++;
 				}
 			}
 		});
-
-		return $numberOfActiveGuestUsers;
+		return ["normal" => $numberOfActiveUsers,  "guest" => $numberOfActiveGuestUsers];
 	}
 }
