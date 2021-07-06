@@ -4,11 +4,11 @@ namespace OCA\QNAP;
 
 use OC\Helper\UserTypeHelper;
 use OCP\IUser;
-use OCP\Settings\ISettings;
-use OCP\License\ILicenseManager;
-use OCP\Template;
 use OCP\IUserManager;
 use OCP\License\Exceptions\LicenseManagerException;
+use OCP\License\ILicenseManager;
+use OCP\Settings\ISettings;
+use OCP\Template;
 
 class AdminPanel implements ISettings {
 	/**

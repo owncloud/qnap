@@ -2,12 +2,13 @@
 
 namespace OCA\QNAP\Tests\Unit;
 
-use OCA\QNAP\AdminPanel;
-use Test\TestCase;
-use OCP\IUser;
-use OCP\License\ILicenseManager;
 use OC\Helper\UserTypeHelper;
+use OCA\QNAP\AdminPanel;
+use OCP\IUser;
 use OCP\IUserManager;
+use OCP\License\ILicenseManager;
+use OCP\Template;
+use Test\TestCase;
 
 class AdminPanelTest extends TestCase {
 	/**
@@ -49,48 +50,22 @@ class AdminPanelTest extends TestCase {
 	}
 
 	public function testGetPanel(): void {
-		self::assertEquals('', $this->panel->getPanel());
-	}
+		$tmpl = new \ReflectionClass(Template::class);
+		$varsProp = $tmpl->getProperty('vars');
+		$varsProp->setAccessible(true);
 
-	public function testGetDefaultUserCount(): void {
-		$class = new \ReflectionClass($this->panel);
-		$getUserCount = $class->getMethod('getUserCount');
-		$getUserCount->setAccessible(true);
+		$panel = $this->panel->getPanel();
+		$vars = $varsProp->getValue($panel);
 
-		$users = $getUserCount->invokeArgs($this->panel, []);
-		$guest = $users["guest"];
-		$normal = $users["normal"];
-		self::assertEquals(0, $guest);
-		self::assertEquals(0, $normal);
-	}
+		$licenses = $vars["licenses"];
+		$licensedUsers = $vars["licensed_users"];
+		$activeUsers = $vars["active_users"];
+		$activeGuestUsers = $vars["active_guest_users"];
 
-	public function testGetXUserCount(): void {
-		$class = new \ReflectionClass($this->panel);
-		$getUserCount = $class->getMethod('getUserCount');
-		$getUserCount->setAccessible(true);
-
-		$this->defineUsers(
-			[
-				0 => [
-					'enabled' => true,
-					'guest' => false,
-				],
-				1 => [
-					'enabled' => true,
-					'guest' => true,
-				],
-				2 => [
-					'enabled' => true,
-					'guest' => true,
-				]
-			]
-		);
-
-		$users = $getUserCount->invokeArgs($this->panel, []);
-		$guest = $users["guest"];
-		$normal = $users["normal"];
-		self::assertEquals(2, $guest);
-		self::assertEquals(1, $normal);
+		self::assertEquals(["test" => "test"], $licenses);
+		self::assertEquals(10, $licensedUsers);
+		self::assertEquals(1, $activeUsers);
+		self::assertEquals(2, $activeGuestUsers);
 	}
 
 	private function defineUsers($users): void {
@@ -114,9 +89,9 @@ class AdminPanelTest extends TestCase {
 				if ($arg1 == 'core' && $arg2 == 'getLicenseClass') {
 					return;
 				} elseif ($arg1 == 'core' && $arg2 == 'getLicenses') {
-					return [];
+					return ["test" => "test"];
 				} elseif ($arg1 == 'core' && $arg2 == 'getUserAllowance') {
-					return 0; // TODO: make configurable
+					return 10;
 				} else {
 					throw new Exception('Not implemented');
 				}
@@ -140,7 +115,30 @@ class AdminPanelTest extends TestCase {
 			})
 		);
 
-		$this->defineUsers([]);
+		$this->defineUsers(
+			[
+				0 => [
+					'enabled' => true,
+					'guest' => false,
+				],
+				1 => [
+					'enabled' => true,
+					'guest' => true,
+				],
+				2 => [
+					'enabled' => true,
+					'guest' => true,
+				],
+				3 => [
+					'enabled' => false,
+					'guest' => false,
+				],
+				4 => [
+					'enabled' => false,
+					'guest' => true,
+				]
+			]
+		);
 
 		$this->panel = new AdminPanel($this->licenseManager, $this->userManager, $this->userTypeHelper);
 	}
