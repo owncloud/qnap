@@ -29,6 +29,8 @@ use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\IUser;
 use OCP\IUserManager;
+use OCP\License\Exceptions\LicenseManagerException;
+use OCP\License\ILicenseManager;
 use OCP\Mail\IMailer;
 use OCP\Notification\IManager;
 use OCP\Template;
@@ -36,9 +38,10 @@ use OCP\Util;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use OCP\License\Exceptions\LicenseManagerException;
 
 class CheckActiveUsers extends Command {
+	/** @var ILicenseManager */
+	private $licenseManager;
 
 	/** @var IUserManager */
 	private $userManager;
@@ -52,22 +55,22 @@ class CheckActiveUsers extends Command {
 	/** @var IGroupManager */
 	private $groupManager;
 
+	/** @var IURLGenerator */
+	private $urlGenerator;
+
 	/** @var IUser[] */
 	private $adminUsers = [];
 
 	/** @var int */
 	private $numberOfActiveUsers = 0;
 
-	/**
-	 * @var IManager
-	 */
+	/** @var IManager */
 	private $notificationManager;
-	/**
-	 * @var IURLGenerator
-	 */
-	private $urlGenerator;
 
-	public function __construct(IUserManager $userManager, IMailer $mailer, IL10N $l10n, IGroupManager $groupManager, IManager $notificationManager, IURLGenerator $urlGenerator) {
+	/** @var UserTypeHelper */
+	private $userTypeHelper;
+
+	public function __construct(IUserManager $userManager, IMailer $mailer, IL10N $l10n, IGroupManager $groupManager, IManager $notificationManager, IURLGenerator $urlGenerator, ILicenseManager $licenseManager, UserTypeHelper $userTypeHelper) {
 		parent::__construct();
 		$this->userManager = $userManager;
 		$this->mailer = $mailer;
@@ -75,6 +78,8 @@ class CheckActiveUsers extends Command {
 		$this->groupManager = $groupManager;
 		$this->notificationManager = $notificationManager;
 		$this->urlGenerator = $urlGenerator;
+		$this->licenseManager = $licenseManager;
+		$this->userTypeHelper = $userTypeHelper;
 	}
 
 	protected function configure() {
@@ -104,16 +109,15 @@ class CheckActiveUsers extends Command {
 	}
 
 	private function getLicensedUsers() : int {
-		$licenseManager = \OC::$server->getLicenseManager();
 		try {
-			$classname = $licenseManager->askLicenseFor('core', 'getLicenseClass');
+			$classname = $this->licenseManager->askLicenseFor('core', 'getLicenseClass');
 			$isQNAP = $classname === QnapLicense::class;
 		} catch (LicenseManagerException $ex) {
 			$isQNAP = false;
 		}
 
 		if ($isQNAP) {
-			return $licenseManager->askLicenseFor('core', 'getUserAllowance');
+			return $this->licenseManager->askLicenseFor('core', 'getUserAllowance');
 		}
 		return QnapLicense::MIN_USER_ALLOWANCE;
 	}
@@ -146,12 +150,12 @@ class CheckActiveUsers extends Command {
 	}
 
 	private function disableExceededUsers(OutputInterface $output, int $licensedUsers): int {
-		$userTypeHelper = new UserTypeHelper();
 		if ($output->isVerbose()) {
 			$output->writeln('Disabling user without license:');
 		}
 		$activeUsers = 0;
-		$this->userManager->callForAllUsers(static function (IUser $user) use (&$activeUsers, $licensedUsers, $userTypeHelper, $output) {
+		$userTypeHelper = $this->userTypeHelper;
+		$this->userManager->callForAllUsers(static function (IUser $user) use (&$activeUsers, $licensedUsers, $output, $userTypeHelper) {
 			if ($user->isEnabled() && $userTypeHelper->isGuestUser($user->getUID()) === false) {
 				$activeUsers++;
 				if ($activeUsers > $licensedUsers) {
@@ -167,9 +171,8 @@ class CheckActiveUsers extends Command {
 	}
 
 	private function prepare() :void {
-		$userTypeHelper = new UserTypeHelper();
-		$this->userManager->callForAllUsers(function (IUser $user) use ($userTypeHelper) {
-			if ($user->isEnabled() && $userTypeHelper->isGuestUser($user->getUID()) === false) {
+		$this->userManager->callForAllUsers(function (IUser $user) {
+			if ($user->isEnabled() && $this->userTypeHelper->isGuestUser($user->getUID()) === false) {
 				$this->numberOfActiveUsers++;
 			}
 			if ($this->groupManager->isAdmin($user->getUID())) {

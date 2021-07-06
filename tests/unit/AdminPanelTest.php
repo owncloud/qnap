@@ -25,10 +25,10 @@ class AdminPanelTest extends TestCase {
 	private $userTypeHelper;
 
 	/** @var array */
-	private $users;
+	private $users = [];
 
 	/** @var array */
-	private $guestUsers;
+	private $guestUsers = [];
 
 	public function testPanelPriority(): void {
 		self::assertEquals(17, $this->panel->getPriority());
@@ -98,7 +98,7 @@ class AdminPanelTest extends TestCase {
 		$this->userManager = $this->createMock(IUserManager::class);
 		$this->userManager->method("callForAllUsers")->will(
 			$this->returnCallback(function ($func) {
-				foreach ((array) $this->users as $user) {
+				foreach ($this->users as $user) {
 					$func($user);
 				}
 			})

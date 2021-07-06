@@ -11,19 +11,13 @@ use OCP\Settings\ISettings;
 use OCP\Template;
 
 class AdminPanel implements ISettings {
-	/**
-	 * @var ILicenseManager
-	 */
+	/** @var ILicenseManager */
 	private $licenseManager;
 
-	/**
-	 * @var IUserManager
-	 */
+	/** @var IUserManager */
 	private $userManager;
 
-	/**
-	 * @var UserTypeHelper
-	 */
+	/** @var UserTypeHelper */
 	private $userTypeHelper;
 
 	public function __construct(ILicenseManager $licenseManager, IUserManager $userManager, UserTypeHelper $userTypeHelper) {
