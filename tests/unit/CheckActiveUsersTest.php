@@ -51,6 +51,9 @@ class CheckActiveusersTest extends TestCase {
 	private $users = [];
 
 	/** @var array */
+	private $enabledUsers = [];
+
+	/** @var array */
 	private $guestUsers = [];
 
 	/** @var array */
@@ -76,9 +79,9 @@ class CheckActiveusersTest extends TestCase {
 		self::assertEquals(1, \count($this->notifications));
 		self::assertEquals(1, \count($this->mails));
 
-		// reset notifications
-		// $this->notifications = [];
-		// $this->mails = [];
+		// clear notifications
+		$this->notifications = [];
+		$this->mails = [];
 
 		// $exec->invokeArgs($this->check, [$input, $output]);
 
@@ -92,17 +95,24 @@ class CheckActiveusersTest extends TestCase {
 			$u = $this->createMock(IUser::class);
 			$u->method("setEnabled")->will(
 				$this->returnCallback(function ($enabled) use ($id) {
-					$this->users[$id]->method('isEnabled')->willReturn($enabled);
+					$this->enabledUsers[$id] = $enabled;
+				})
+			);
+			$u->method("isEnabled")->will(
+				$this->returnCallback(function () use ($id) {
+					return $this->enabledUsers[$id];
 				})
 			);
 			$u->method('getUID')->willReturn($id);
-			$enabled=$user["enabled"];
-			$u->method('isEnabled')->willReturn($enabled);
+
 			$this->users[$id] = $u;
+
+			$enabled = $user['enabled'];
+			$this->enabledUsers[$id] = $enabled;
 
 			$isGuest = $user['guest'];
 			$this->guestUsers[$id] = $isGuest;
-			
+
 			$isAdmin = $user['admin'];
 			$this->adminUsers[$id] = $isAdmin;
 		}
@@ -135,7 +145,7 @@ class CheckActiveusersTest extends TestCase {
 				return $isAdmin;
 			})
 		);
-		
+
 		$this->licenseManager = $this->createMock(ILicenseManager::class);
 		$this->licenseManager->method("askLicenseFor")->will(
 			$this->returnCallback(function ($arg1, $arg2) {
@@ -152,51 +162,61 @@ class CheckActiveusersTest extends TestCase {
 		$this->defineUsers(
 			[
 				0 => [
+					// enabled admin user
 					'enabled' => true,
 					'admin' => true,
 					'guest' => false,
 				],
 				1 => [
+					// enabled guest user
 					'enabled' => true,
 					'admin' => false,
 					'guest' => true,
 				],
 				2 => [
+					// enabled guest user
 					'enabled' => true,
 					'admin' => false,
 					'guest' => true,
 				],
 				3 => [
+					// disabled normal user
 					'enabled' => false,
 					'admin' => false,
 					'guest' => false,
 				],
 				4 => [
+					// disabled guest user
 					'enabled' => false,
 					'admin' => false,
 					'guest' => true,
 				],
 				5 => [
+					// enabled normal user
 					'enabled' => true,
 					'admin' => false,
 					'guest' => false,
 				],
 				6 => [
+					// enabled normal user
 					'enabled' => true,
 					'admin' => false,
 					'guest' => false,
 				],
 				8 => [
+					// enabled normal user
 					'enabled' => true,
 					'admin' => false,
 					'guest' => false,
 				],
 				9 => [
+					// enabled normal user
 					'enabled' => true,
 					'admin' => false,
 					'guest' => false,
 				],
 				10 => [
+					// enabled normal user
 					'enabled' => true,
 					'admin' => false,
 					'guest' => false,
