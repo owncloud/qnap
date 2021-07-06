@@ -65,7 +65,36 @@ class CheckActiveusersTest extends TestCase {
 	/** @var array */
 	private $mails = [];
 
-	public function testExecute(): void {
+	/** @var int */
+	const USER_ALLOWANCE = 5;
+
+	/** @var array */
+	const ENABLED_ADMIN_USER = ['enabled' => true, 'admin' => true, 'guest' => false];
+	const ENABLED_GUEST_USER = ['enabled' => true, 'admin' => false, 'guest' => true];
+	const DISABLED_GUEST_USER = ['enabled' => false, 'admin' => false, 'guest' => true];
+	const ENABLED_NORMAL_USER = ['enabled' => true, 'admin' => false, 'guest' => false];
+	const DISABLED_NORMAL_USER = ['enabled' => false, 'admin' => false, 'guest' => false];
+
+	public function testExecuteExceededUserAllowance(): void {
+		$this->defineUsers([
+			0 => self::ENABLED_ADMIN_USER,
+			1 => self::ENABLED_GUEST_USER,
+			2 => self::DISABLED_GUEST_USER,
+			3 => self::DISABLED_NORMAL_USER,
+			4 => self::ENABLED_GUEST_USER,
+			5 => self::ENABLED_GUEST_USER,
+			6 => self::ENABLED_NORMAL_USER,
+			8 => self::ENABLED_NORMAL_USER,
+			9 => self::ENABLED_NORMAL_USER,
+			10 => self::ENABLED_NORMAL_USER,
+			11 => self::ENABLED_NORMAL_USER,
+			12 => self::ENABLED_GUEST_USER,
+			13 => self::ENABLED_GUEST_USER,
+			14 => self::ENABLED_GUEST_USER,
+			15 => self::ENABLED_GUEST_USER,
+			16 => self::ENABLED_GUEST_USER,
+		]);
+
 		$input = $this->createMock(InputInterface::class);
 		$output = $this->createMock(OutputInterface::class);
 
@@ -73,21 +102,75 @@ class CheckActiveusersTest extends TestCase {
 		$exec = $cmd->getMethod('execute');
 		$exec->setAccessible(true);
 
+		self::assertEquals(6, $this->getActiveUsers());
+		self::assertEquals(8, $this->getActiveGuests());
+
 		$exec->invokeArgs($this->check, [$input, $output]);
 
-		// one user more active then allowed -> deactivation notifications have been created
+		// one user more active then allowed
+		// -> excess users were deactivated
+		self::assertEquals(self::USER_ALLOWANCE, $this->getActiveUsers());
+		// -> guests haven't been touched
+		self::assertEquals(8, $this->getActiveGuests());
+		// -> deactivation notifications have been created
 		self::assertEquals(1, \count($this->notifications));
 		self::assertEquals(1, \count($this->mails));
+	}
 
-		// clear notifications
-		$this->notifications = [];
-		$this->mails = [];
+	public function testExecuteWithinUserAllowance(): void {
+		$this->defineUsers([
+			0 => self::ENABLED_ADMIN_USER,
+			1 => self::ENABLED_GUEST_USER,
+			2 => self::DISABLED_GUEST_USER,
+			3 => self::DISABLED_NORMAL_USER,
+			4 => self::ENABLED_GUEST_USER,
+			5 => self::ENABLED_GUEST_USER,
+			6 => self::ENABLED_NORMAL_USER,
+			8 => self::ENABLED_NORMAL_USER,
+			9 => self::ENABLED_NORMAL_USER,
+			10 => self::ENABLED_GUEST_USER,
+			11 => self::ENABLED_GUEST_USER,
+			12 => self::ENABLED_GUEST_USER,
+			13 => self::ENABLED_GUEST_USER,
+			14 => self::ENABLED_GUEST_USER,
+		]);
 
-		// $exec->invokeArgs($this->check, [$input, $output]);
+		$input = $this->createMock(InputInterface::class);
+		$output = $this->createMock(OutputInterface::class);
 
-		// excess user has been deactivated before -> no deactivation notifications will be created
-		// self::assertEquals(0, count($this->mails));
-		// self::assertEquals(0, count($this->notifications));
+		$cmd = new \ReflectionClass(CheckActiveUsers::class);
+		$exec = $cmd->getMethod('execute');
+		$exec->setAccessible(true);
+
+		self::assertEquals(4, $this->getActiveUsers());
+		self::assertEquals(8, $this->getActiveGuests());
+
+		$exec->invokeArgs($this->check, [$input, $output]);
+
+		// one user less active then allowed
+		// -> no user has been touched
+		self::assertEquals(4, $this->getActiveUsers());
+		// -> guests haven't been touched
+		self::assertEquals(8, $this->getActiveGuests());
+		// -> deactivation notifications have been created
+		self::assertEquals(0, \count($this->notifications));
+		self::assertEquals(0, \count($this->mails));
+	}
+
+	private function getActiveUsers(): int {
+		$res = [];
+		foreach ($this->enabledUsers as $i=>$enabled) {
+			$res[$i] = $enabled && !$this->guestUsers[$i];
+		}
+		return \count(\array_filter($res));
+	}
+
+	private function getActiveGuests(): int {
+		$res = [];
+		foreach ($this->enabledUsers as $i=>$enabled) {
+			$res[$i] = $enabled && $this->guestUsers[$i];
+		}
+		return \count(\array_filter($res));
 	}
 
 	private function defineUsers($users): void {
@@ -152,76 +235,11 @@ class CheckActiveusersTest extends TestCase {
 				if ($arg1 == 'core' && $arg2 == 'getLicenseClass') {
 					return QnapLicense::class;
 				} elseif ($arg1 == 'core' && $arg2 == 'getUserAllowance') {
-					return 5;
+					return self::USER_ALLOWANCE;
 				} else {
 					throw new Exception('Not implemented');
 				}
 			})
-		);
-
-		$this->defineUsers(
-			[
-				0 => [
-					// enabled admin user
-					'enabled' => true,
-					'admin' => true,
-					'guest' => false,
-				],
-				1 => [
-					// enabled guest user
-					'enabled' => true,
-					'admin' => false,
-					'guest' => true,
-				],
-				2 => [
-					// enabled guest user
-					'enabled' => true,
-					'admin' => false,
-					'guest' => true,
-				],
-				3 => [
-					// disabled normal user
-					'enabled' => false,
-					'admin' => false,
-					'guest' => false,
-				],
-				4 => [
-					// disabled guest user
-					'enabled' => false,
-					'admin' => false,
-					'guest' => true,
-				],
-				5 => [
-					// enabled normal user
-					'enabled' => true,
-					'admin' => false,
-					'guest' => false,
-				],
-				6 => [
-					// enabled normal user
-					'enabled' => true,
-					'admin' => false,
-					'guest' => false,
-				],
-				8 => [
-					// enabled normal user
-					'enabled' => true,
-					'admin' => false,
-					'guest' => false,
-				],
-				9 => [
-					// enabled normal user
-					'enabled' => true,
-					'admin' => false,
-					'guest' => false,
-				],
-				10 => [
-					// enabled normal user
-					'enabled' => true,
-					'admin' => false,
-					'guest' => false,
-				],
-			]
 		);
 
 		$this->notificationManager = $this->createMock(IManager::class);
