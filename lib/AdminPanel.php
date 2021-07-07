@@ -23,7 +23,6 @@ class AdminPanel implements ISettings {
 	public function __construct(ILicenseManager $licenseManager, IUserManager $userManager, UserTypeHelper $userTypeHelper) {
 		$this->licenseManager = $licenseManager;
 		$this->userManager = $userManager;
-
 		$this->userTypeHelper = $userTypeHelper;
 	}
 

@@ -39,22 +39,23 @@ class AdminPanelTest extends TestCase {
 	}
 
 	public function testGetPanel(): void {
-		$tmpl = new \ReflectionClass(BaseTemplate::class);
-		$varsProp = $tmpl->getProperty('vars');
-		$varsProp->setAccessible(true);
+		$page = $this->panel->getPanel()->fetchPage();
+		self::assertStringContainsString("Active users: 1", $page);
+		self::assertStringContainsString("Licensed users: 10", $page);
+		self::assertStringContainsString("Active guest users: 2", $page);
+		self::assertStringContainsString("Licensed guest users: unlimited", $page);
 
-		$panel = $this->panel->getPanel();
-		$vars = $varsProp->getValue($panel);
+		self::assertStringContainsString("<td>license1</td>", $page);
+		self::assertStringContainsString("<td>Thursday, 18-Mar-2021 09:25:40 UTC</td>", $page);
+		self::assertStringContainsString("<td>Thursday, 18-Mar-2021 09:27:20 UTC</td>", $page);
+		self::assertStringContainsString("<td>5</td>", $page);
+		self::assertStringContainsString("<td>valid</td>", $page);
 
-		$licenses = $vars["licenses"];
-		$licensedUsers = $vars["licensed_users"];
-		$activeUsers = $vars["active_users"];
-		$activeGuestUsers = $vars["active_guest_users"];
-
-		self::assertEquals(["test" => "test"], $licenses);
-		self::assertEquals(10, $licensedUsers);
-		self::assertEquals(1, $activeUsers);
-		self::assertEquals(2, $activeGuestUsers);
+		self::assertStringContainsString("<td>license2</td>", $page);
+		self::assertStringContainsString("<td>Thursday, 18-Mar-2021 09:25:59 UTC</td>", $page);
+		self::assertStringContainsString("<td>Thursday, 18-Mar-2021 09:27:39 UTC</td>", $page);
+		self::assertStringContainsString("<td>5</td>", $page);
+		self::assertStringContainsString("<td>valid</td>", $page);
 	}
 
 	private function defineUsers($users): void {
@@ -78,7 +79,30 @@ class AdminPanelTest extends TestCase {
 				if ($arg1 == 'core' && $arg2 == 'getLicenseClass') {
 					return QnapLicense::class;
 				} elseif ($arg1 == 'core' && $arg2 == 'getLicenses') {
-					return ["test" => "test"];
+					return [
+						[
+							'license_id' => 'license1',
+							'status' => 'valid',
+							'license_info' => [
+								'valid_from' => \date_create()->setTimestamp(1616059540),
+								'valid_until' => \date_create()->setTimestamp(1616059640),
+								'attributes' => [
+									'owncloud_account' => 5
+								]
+							]
+						],
+						[
+							'license_id' => 'license2',
+							'status' => 'valid',
+							'license_info' => [
+								'valid_from' => \date_create()->setTimestamp(1616059559),
+								'valid_until' => \date_create()->setTimestamp(1616059659),
+								'attributes' => [
+									'owncloud_account' => 5
+								]
+							]
+						],
+					];
 				} elseif ($arg1 == 'core' && $arg2 == 'getUserAllowance') {
 					return 10;
 				} else {
