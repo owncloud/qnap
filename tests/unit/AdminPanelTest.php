@@ -26,15 +26,11 @@ class AdminPanelTest extends TestCase {
 
 	/** @var array */
 	private $users = [];
-
-	/** @var array */
 	private $guestUsers = [];
-
-	/** @var array */
 	private $licenses = [];
 
 	/** @var int */
-	private $userAllowance = 10;
+	private $userAllowance = 0;
 
 	public function testPanelPriority(): void {
 		self::assertEquals(17, $this->panel->getPriority());
@@ -163,5 +159,13 @@ class AdminPanelTest extends TestCase {
 			})
 		);
 		$this->panel = new AdminPanel($this->licenseManager, $this->userManager, $this->userTypeHelper);
+	}
+
+	protected function tearDown(): void {
+		parent::tearDown();
+
+		$this->userAllowance = 0;
+		$this->users = [];
+		$this->guestUsers = [];
 	}
 }

@@ -48,18 +48,12 @@ class CheckActiveusersTest extends TestCase {
 
 	/** @var array */
 	private $users = [];
-
-	/** @var array */
 	private $enabledUsers = [];
-
-	/** @var array */
 	private $guestUsers = [];
-
-	/** @var array */
 	private $adminUsers = [];
 
 	/** @var int */
-	private $userAllowance = 5;
+	private $userAllowance = 0;
 
 	/** @var array */
 	const ENABLED_ADMIN_USER = ['enabled' => true, 'admin' => true, 'guest' => false];
@@ -258,5 +252,15 @@ class CheckActiveusersTest extends TestCase {
 			$this->userTypeHelper
 		);
 		$this->commandTester = new CommandTester($command);
+	}
+
+	protected function tearDown(): void {
+		parent::tearDown();
+
+		$this->userAllowance = 0;
+		$this->users = [];
+		$this->guestUsers = [];
+		$this->adminUsers = [];
+		$this->enabledUsers = [];
 	}
 }
