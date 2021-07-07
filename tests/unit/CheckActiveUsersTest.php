@@ -58,14 +58,8 @@ class CheckActiveusersTest extends TestCase {
 	/** @var array */
 	private $adminUsers = [];
 
-	/** @var array */
-	private $notifications = [];
-
-	/** @var array */
-	private $mails = [];
-
 	/** @var int */
-	const USER_ALLOWANCE = 5;
+	private $userAllowance = 5;
 
 	/** @var array */
 	const ENABLED_ADMIN_USER = ['enabled' => true, 'admin' => true, 'guest' => false];
@@ -94,19 +88,24 @@ class CheckActiveusersTest extends TestCase {
 			16 => self::ENABLED_GUEST_USER,
 		]);
 
+		$this->userAllowance = 5;
+
 		self::assertEquals(6, $this->getActiveUsers());
 		self::assertEquals(8, $this->getActiveGuests());
 
+		// deactivation notifications will be created
+		// -> 1 admin user, so only 1 notification and 1 mail
+		$this->notificationManager->expects($this->once())->method("notify");
+		$this->mailer->expects($this->once())->method("send");
+
 		$this->commandTester->execute([]);
 
-		// one user more active then allowed
+		// more users active then allowed
 		// -> excess users were deactivated
-		self::assertEquals(self::USER_ALLOWANCE, $this->getActiveUsers());
+		self::assertEquals($this->userAllowance, $this->getActiveUsers());
 		// -> guests haven't been touched
 		self::assertEquals(8, $this->getActiveGuests());
-		// -> deactivation notifications have been created
-		self::assertEquals(1, \count($this->notifications));
-		self::assertEquals(1, \count($this->mails));
+
 	}
 
 	public function testExecuteWithinUserAllowance(): void {
@@ -127,19 +126,22 @@ class CheckActiveusersTest extends TestCase {
 			14 => self::ENABLED_GUEST_USER,
 		]);
 
+		$this->userAllowance = 5;
+
 		self::assertEquals(4, $this->getActiveUsers());
 		self::assertEquals(8, $this->getActiveGuests());
 
+		// deactivation notifications will not be created
+		$this->notificationManager->expects($this->never())->method("notify");
+		$this->mailer->expects($this->never())->method("send");
+
 		$this->commandTester->execute([]);
 
-		// one user less active then allowed
+		// less users active then allowed
 		// -> no user has been touched
 		self::assertEquals(4, $this->getActiveUsers());
 		// -> guests haven't been touched
 		self::assertEquals(8, $this->getActiveGuests());
-		// -> deactivation notifications have been created
-		self::assertEquals(0, \count($this->notifications));
-		self::assertEquals(0, \count($this->mails));
 	}
 
 	private function getActiveUsers(): int {
@@ -220,7 +222,7 @@ class CheckActiveusersTest extends TestCase {
 				if ($arg1 == 'core' && $arg2 == 'getLicenseClass') {
 					return QnapLicense::class;
 				} elseif ($arg1 == 'core' && $arg2 == 'getUserAllowance') {
-					return self::USER_ALLOWANCE;
+					return $this->userAllowance;
 				} else {
 					throw new Exception('Not implemented');
 				}
@@ -233,21 +235,11 @@ class CheckActiveusersTest extends TestCase {
 				return $this->createMock(INotification::class);
 			})
 		);
-		$this->notificationManager->method("notify")->will(
-			$this->returnCallback(function ($notification) {
-				\array_push($this->notifications, $notification);
-			})
-		);
 
 		$this->mailer = $this->createMock(IMailer::class);
 		$this->mailer->method("createMessage")->will(
 			$this->returnCallback(function () {
 				return $this->createMock(Message::class);
-			})
-		);
-		$this->mailer->method("send")->will(
-			$this->returnCallback(function ($mail) {
-				\array_push($this->mails, $mail);
 			})
 		);
 

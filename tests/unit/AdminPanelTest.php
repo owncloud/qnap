@@ -30,6 +30,12 @@ class AdminPanelTest extends TestCase {
 	/** @var array */
 	private $guestUsers = [];
 
+	/** @var array */
+	private $licenses = [];
+
+	/** @var int */
+	private $userAllowance = 10;
+
 	public function testPanelPriority(): void {
 		self::assertEquals(17, $this->panel->getPriority());
 	}
@@ -39,6 +45,58 @@ class AdminPanelTest extends TestCase {
 	}
 
 	public function testGetPanel(): void {
+		$this->licenses = [
+			[
+				'license_id' => 'license1',
+				'status' => 'valid',
+				'license_info' => [
+					'valid_from' => \date_create()->setTimestamp(1616059540),
+					'valid_until' => \date_create()->setTimestamp(1616059640),
+					'attributes' => [
+						'owncloud_account' => 5
+					]
+				]
+			],
+			[
+				'license_id' => 'license2',
+				'status' => 'valid',
+				'license_info' => [
+					'valid_from' => \date_create()->setTimestamp(1616059559),
+					'valid_until' => \date_create()->setTimestamp(1616059659),
+					'attributes' => [
+						'owncloud_account' => 5
+					]
+				]
+			],
+		];
+
+		$this->defineUsers(
+			[
+				0 => [
+					'enabled' => true,
+					'guest' => false,
+				],
+				1 => [
+					'enabled' => true,
+					'guest' => true,
+				],
+				2 => [
+					'enabled' => true,
+					'guest' => true,
+				],
+				3 => [
+					'enabled' => false,
+					'guest' => false,
+				],
+				4 => [
+					'enabled' => false,
+					'guest' => true,
+				]
+			]
+		);
+
+		$this->userAllowance = 10;
+
 		$page = $this->panel->getPanel()->fetchPage();
 		self::assertStringContainsString("Active users: 1", $page);
 		self::assertStringContainsString("Licensed users: 10", $page);
@@ -79,32 +137,9 @@ class AdminPanelTest extends TestCase {
 				if ($arg1 == 'core' && $arg2 == 'getLicenseClass') {
 					return QnapLicense::class;
 				} elseif ($arg1 == 'core' && $arg2 == 'getLicenses') {
-					return [
-						[
-							'license_id' => 'license1',
-							'status' => 'valid',
-							'license_info' => [
-								'valid_from' => \date_create()->setTimestamp(1616059540),
-								'valid_until' => \date_create()->setTimestamp(1616059640),
-								'attributes' => [
-									'owncloud_account' => 5
-								]
-							]
-						],
-						[
-							'license_id' => 'license2',
-							'status' => 'valid',
-							'license_info' => [
-								'valid_from' => \date_create()->setTimestamp(1616059559),
-								'valid_until' => \date_create()->setTimestamp(1616059659),
-								'attributes' => [
-									'owncloud_account' => 5
-								]
-							]
-						],
-					];
+					return $this->licenses;
 				} elseif ($arg1 == 'core' && $arg2 == 'getUserAllowance') {
-					return 10;
+					return $this->userAllowance;
 				} else {
 					throw new Exception('Not implemented');
 				}
@@ -127,32 +162,6 @@ class AdminPanelTest extends TestCase {
 				}
 			})
 		);
-
-		$this->defineUsers(
-			[
-				0 => [
-					'enabled' => true,
-					'guest' => false,
-				],
-				1 => [
-					'enabled' => true,
-					'guest' => true,
-				],
-				2 => [
-					'enabled' => true,
-					'guest' => true,
-				],
-				3 => [
-					'enabled' => false,
-					'guest' => false,
-				],
-				4 => [
-					'enabled' => false,
-					'guest' => true,
-				]
-			]
-		);
-
 		$this->panel = new AdminPanel($this->licenseManager, $this->userManager, $this->userTypeHelper);
 	}
 }
