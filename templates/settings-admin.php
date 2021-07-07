@@ -9,7 +9,13 @@
 	<br>
 	<?php p($l->t('Licensed users: %d', $_['licensed_users']))?>
 	<br>
+	<?php p($l->t('Active guest users: %d', $_['active_guest_users']))?>
+	<br>
+	<?php p($l->t('Licensed guest users: unlimited'))?>
+	<br>
+	<br>
 	<a href="https://software.qnap.com/owncloud.html"><?php p($l->t('Visit the QNAP Store to purchase more licenses.')) ?></a>
+	<br>
 </p>
 
 <h3><?php p($l->t('License Overview')); ?></h3>
@@ -20,6 +26,7 @@
 		<th scope="col"><?php p($l->t('Valid from')); ?></th>
 		<th scope="col"><?php p($l->t('Valid until')); ?></th>
 		<th scope="col"><?php p($l->t('Number of users')); ?></th>
+		<th scope="col"><?php p($l->t('Status')); ?></th>
 	</tr>
 	</thead>
 	<tbody>
@@ -29,6 +36,7 @@
 			<td><?php p($lic['license_info']['valid_from']->format(\DateTime::COOKIE)); ?></td>
 			<td><?php p($lic['license_info']['valid_until']->format(\DateTime::COOKIE)); ?></td>
 			<td><?php p($lic['license_info']['attributes']['owncloud_account']); ?></td>
+			<td><?php p($lic['status']); ?></td>
 		</tr>
 	<?php endforeach ?>
 	</tbody>

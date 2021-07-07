@@ -24,7 +24,9 @@ print_unescaped("\n");
 print_unescaped("\n");
 p($l->t('The maximum user limit was exceeded.'));
 print_unescaped("\n");
-p($l->t('To add more users, purchase a license from https://software.qnap.com/owncloud.html'));
+p($l->t('To add further users, purchase a license from '));
+print_unescaped("\n");
+print_unescaped("https://software.qnap.com/owncloud.html");
 print_unescaped("\n");
 print_unescaped("\n");
 // TRANSLATORS term at the end of a mail

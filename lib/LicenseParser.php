@@ -5,8 +5,6 @@ namespace OCA\QNAP;
 use OCP\AppFramework\Utility\ITimeFactory;
 
 class LicenseParser {
-	public const MIN_USER_ALLOWANCE = 5;
-
 	public const DATETIME_FORMAT = 'Y-m-d H:i:s.u';
 
 	private $activeLicenses = [];
@@ -22,21 +20,16 @@ class LicenseParser {
 		$this->timeFactory = $timeFactory;
 	}
 
-	public function loadLicensesFile(string $filePath): void {
-		$licensesFileContents = \file_get_contents($filePath);
-		if ($licensesFileContents === false) {
-			return;
-		}
-		$this->loadLicensesText($licensesFileContents);
-	}
-
 	public function loadLicensesText(string $licenseText): void {
-		$cmdOutput = \json_decode($licenseText, true);
-		if ($cmdOutput === null) {
+		$licensesString = \base64_decode($licenseText, true);
+		if ($licensesString === false) {
 			return;
 		}
 
-		$licenses = $cmdOutput['result'] ?? [];
+		$licenses = \json_decode($licensesString, true);
+		if ($licenses === null) {
+			return;
+		}
 
 		$now = $this->timeFactory->getTime();
 		foreach ($licenses as $r) {
@@ -63,13 +56,13 @@ class LicenseParser {
 				$this->expiredLicenses[]= $r;
 				continue;
 			}
+			if ($r['status'] !== "valid") {
+				$this->expiredLicenses[]= $r;
+				continue;
+			}
 			# active licenses
 			$this->activeLicenses[]= $r;
 		}
-	}
-
-	public function getLicenseString(): string {
-		return 'qnap-license';
 	}
 
 	public function isValid(): bool {
@@ -105,7 +98,7 @@ class LicenseParser {
 		foreach ($this->activeLicenses as $license) {
 			$allowance += $this->getLicenseUserAllowance($license);
 		}
-		return \max($allowance, self::MIN_USER_ALLOWANCE);
+		return $allowance;
 	}
 
 	private function getLicenseUserAllowance($license): int {

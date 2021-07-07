@@ -2,23 +2,23 @@
 
 namespace OCA\QNAP;
 
-use OC\License\ILicense;
+use OCP\License\AbstractLicense;
 
-class QnapLicense implements ILicense {
-	public const LICENSE_PATH = '/mnt/licenses/owncloud.json';
+class QnapLicense extends AbstractLicense {
+	public const MIN_USER_ALLOWANCE = 5;
 
 	/**
 	 * @var LicenseParser
 	 */
 	private $licenseParser;
 
-	public function __construct() {
+	public function __construct(string $licenseKey) {
 		$this->licenseParser = new LicenseParser(\OC::$server->getTimeFactory());
-		$this->licenseParser->loadLicensesFile(self::LICENSE_PATH);
+		$this->licenseParser->loadLicensesText($licenseKey);
 	}
 
 	public function getLicenseString(): string {
-		return 'qnap-license';
+		return 'qnap-license'; // license is stored by ownCloud not by QnapLicense
 	}
 
 	public function isValid(): bool {
@@ -30,7 +30,7 @@ class QnapLicense implements ILicense {
 	}
 
 	public function getUserAllowance(): int {
-		return $this->licenseParser->getUserAllowance();
+		return \max($this->licenseParser->getUserAllowance(), self::MIN_USER_ALLOWANCE);
 	}
 
 	public function getType(): int {

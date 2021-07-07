@@ -14,7 +14,7 @@
     <repository type="git">https://github.com/owncloud/qnap.git</repository>
     <screenshot>https://raw.githubusercontent.com/owncloud/screenshots/master/qnap/qnap.png</screenshot>
     <dependencies>
-        <owncloud min-version="10.6" max-version="10"/>
+        <owncloud min-version="10.8" max-version="10"/>
     </dependencies>
     <default_enable/>
     <types>

@@ -31,10 +31,10 @@ class LicenseParserTest extends TestCase {
 	public function providesLicenses(): array {
 		return [
 			'no license' => [
-				false, 5, 0, ''
+				false, 0, 0, ''
 			],
 			'expired license' => [
-				false, 5, 1615812628, self::buildLicenseString([
+				false, 0, 1615812628, self::buildLicenseString([
 					[
 						'valid_from' => '2020-03-15 12:50:28.845000',
 						'valid_until' => '2021-03-15 12:50:28.845000',
@@ -159,11 +159,7 @@ class LicenseParserTest extends TestCase {
 			];
 		}
 
-		return \json_encode([
-			"code" => 0,
-			"message" => "success",
-			"result" => $licenses
-		]);
+		return \base64_encode(\json_encode($licenses));
 	}
 
 	protected function setUp(): void {

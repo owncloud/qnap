@@ -22,12 +22,15 @@
 
 namespace OCA\QNAP\Command;
 
+use OC\Helper\UserTypeHelper;
 use OCA\QNAP\QnapLicense;
 use OCP\IGroupManager;
 use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\IUser;
 use OCP\IUserManager;
+use OCP\License\Exceptions\LicenseManagerException;
+use OCP\License\ILicenseManager;
 use OCP\Mail\IMailer;
 use OCP\Notification\IManager;
 use OCP\Template;
@@ -37,6 +40,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class CheckActiveUsers extends Command {
+	/** @var ILicenseManager */
+	private $licenseManager;
 
 	/** @var IUserManager */
 	private $userManager;
@@ -50,22 +55,22 @@ class CheckActiveUsers extends Command {
 	/** @var IGroupManager */
 	private $groupManager;
 
+	/** @var IURLGenerator */
+	private $urlGenerator;
+
 	/** @var IUser[] */
 	private $adminUsers = [];
 
 	/** @var int */
 	private $numberOfActiveUsers = 0;
 
-	/**
-	 * @var IManager
-	 */
+	/** @var IManager */
 	private $notificationManager;
-	/**
-	 * @var IURLGenerator
-	 */
-	private $urlGenerator;
 
-	public function __construct(IUserManager $userManager, IMailer $mailer, IL10N $l10n, IGroupManager $groupManager, IManager $notificationManager, IURLGenerator $urlGenerator) {
+	/** @var UserTypeHelper */
+	private $userTypeHelper;
+
+	public function __construct(IUserManager $userManager, IMailer $mailer, IL10N $l10n, IGroupManager $groupManager, IManager $notificationManager, IURLGenerator $urlGenerator, ILicenseManager $licenseManager, UserTypeHelper $userTypeHelper) {
 		parent::__construct();
 		$this->userManager = $userManager;
 		$this->mailer = $mailer;
@@ -73,6 +78,8 @@ class CheckActiveUsers extends Command {
 		$this->groupManager = $groupManager;
 		$this->notificationManager = $notificationManager;
 		$this->urlGenerator = $urlGenerator;
+		$this->licenseManager = $licenseManager;
+		$this->userTypeHelper = $userTypeHelper;
 	}
 
 	protected function configure() {
@@ -82,6 +89,7 @@ class CheckActiveUsers extends Command {
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$this->prepare();
+
 		$licensedUsers = $this->getLicensedUsers();
 		if ($output->isVerbose()) {
 			$output->writeln("After preparation: {$this->numberOfActiveUsers} active users, $licensedUsers licensed users");
@@ -101,8 +109,17 @@ class CheckActiveUsers extends Command {
 	}
 
 	private function getLicensedUsers() : int {
-		$q = new QnapLicense;
-		return $q->getUserAllowance();
+		try {
+			$classname = $this->licenseManager->askLicenseFor('core', 'getLicenseClass');
+			$isQNAP = $classname === QnapLicense::class;
+		} catch (LicenseManagerException $ex) {
+			$isQNAP = false;
+		}
+
+		if ($isQNAP) {
+			return $this->licenseManager->askLicenseFor('core', 'getUserAllowance');
+		}
+		return QnapLicense::MIN_USER_ALLOWANCE;
 	}
 
 	private function sendEMailToAdmin(OutputInterface $output): void {
@@ -137,14 +154,15 @@ class CheckActiveUsers extends Command {
 			$output->writeln('Disabling user without license:');
 		}
 		$activeUsers = 0;
-		$this->userManager->callForAllUsers(static function (IUser $user) use (&$activeUsers, $licensedUsers, $output) {
-			if ($user->isEnabled()) {
+		$userTypeHelper = $this->userTypeHelper;
+		$this->userManager->callForAllUsers(static function (IUser $user) use (&$activeUsers, $licensedUsers, $output, $userTypeHelper) {
+			if ($user->isEnabled() && $userTypeHelper->isGuestUser($user->getUID()) === false) {
 				$activeUsers++;
-			}
-			if ($activeUsers > $licensedUsers) {
-				$user->setEnabled(false);
-				if ($output->isVerbose()) {
-					$output->writeln($user->getUID());
+				if ($activeUsers > $licensedUsers) {
+					$user->setEnabled(false);
+					if ($output->isVerbose()) {
+						$output->writeln($user->getUID());
+					}
 				}
 			}
 		});
@@ -154,7 +172,7 @@ class CheckActiveUsers extends Command {
 
 	private function prepare() :void {
 		$this->userManager->callForAllUsers(function (IUser $user) {
-			if ($user->isEnabled()) {
+			if ($user->isEnabled() && $this->userTypeHelper->isGuestUser($user->getUID()) === false) {
 				$this->numberOfActiveUsers++;
 			}
 			if ($this->groupManager->isAdmin($user->getUID())) {
