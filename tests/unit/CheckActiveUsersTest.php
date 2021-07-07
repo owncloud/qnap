@@ -68,80 +68,85 @@ class CheckActiveusersTest extends TestCase {
 	const ENABLED_NORMAL_USER = ['enabled' => true, 'admin' => false, 'guest' => false];
 	const DISABLED_NORMAL_USER = ['enabled' => false, 'admin' => false, 'guest' => false];
 
-	public function testExecuteExceededUserAllowance(): void {
-		$this->defineUsers([
-			0 => self::ENABLED_ADMIN_USER,
-			1 => self::ENABLED_GUEST_USER,
-			2 => self::DISABLED_GUEST_USER,
-			3 => self::DISABLED_NORMAL_USER,
-			4 => self::ENABLED_GUEST_USER,
-			5 => self::ENABLED_GUEST_USER,
-			6 => self::ENABLED_NORMAL_USER,
-			8 => self::ENABLED_NORMAL_USER,
-			9 => self::ENABLED_NORMAL_USER,
-			10 => self::ENABLED_NORMAL_USER,
-			11 => self::ENABLED_NORMAL_USER,
-			12 => self::ENABLED_GUEST_USER,
-			13 => self::ENABLED_GUEST_USER,
-			14 => self::ENABLED_GUEST_USER,
-			15 => self::ENABLED_GUEST_USER,
-			16 => self::ENABLED_GUEST_USER,
-		]);
+	/**
+	 * @dataProvider providesUserAllowance
+	 * @param array $users
+	 * @param int $userAllowance
+	 * @param int $expectedUsersBefore
+	 * @param int $expectedGuests
+	 * @param int $expectedNotifications
+	 */
+	public function testCommand(array $users, int $userAllowance, int $expectedUsersBefore, int $expectedGuests, int $expectedNotifications): void {
+		$this->defineUsers($users);
+		$this->userAllowance = $userAllowance;
 
-		$this->userAllowance = 5;
+		self::assertEquals($expectedUsersBefore, $this->getActiveUsers());
+		self::assertEquals($expectedGuests, $this->getActiveGuests());
 
-		self::assertEquals(6, $this->getActiveUsers());
-		self::assertEquals(8, $this->getActiveGuests());
+		$this->notificationManager->expects($this->exactly($expectedNotifications))->method("notify");
+		$this->mailer->expects($this->exactly($expectedNotifications))->method("send");
 
-		// deactivation notifications will be created
-		// -> 1 admin user, so only 1 notification and 1 mail
-		$this->notificationManager->expects($this->once())->method("notify");
-		$this->mailer->expects($this->once())->method("send");
+		$usersBefore = $this->getActiveUsers();
 
 		$this->commandTester->execute([]);
 
-		// more users active then allowed
-		// -> excess users were deactivated
-		self::assertEquals($this->userAllowance, $this->getActiveUsers());
-		// -> guests haven't been touched
-		self::assertEquals(8, $this->getActiveGuests());
-
+		self::assertLessThanOrEqual($this->userAllowance, $this->getActiveUsers());
+		if ($usersBefore >= $this->userAllowance) {
+			self::assertEquals($this->userAllowance, $this->getActiveUsers());
+		}
+		self::assertEquals($expectedGuests, $this->getActiveGuests());
 	}
 
-	public function testExecuteWithinUserAllowance(): void {
-		$this->defineUsers([
-			0 => self::ENABLED_ADMIN_USER,
-			1 => self::ENABLED_GUEST_USER,
-			2 => self::DISABLED_GUEST_USER,
-			3 => self::DISABLED_NORMAL_USER,
-			4 => self::ENABLED_GUEST_USER,
-			5 => self::ENABLED_GUEST_USER,
-			6 => self::ENABLED_NORMAL_USER,
-			8 => self::ENABLED_NORMAL_USER,
-			9 => self::ENABLED_NORMAL_USER,
-			10 => self::ENABLED_GUEST_USER,
-			11 => self::ENABLED_GUEST_USER,
-			12 => self::ENABLED_GUEST_USER,
-			13 => self::ENABLED_GUEST_USER,
-			14 => self::ENABLED_GUEST_USER,
-		]);
+	public function providesUserAllowance(): array {
+		return [
+			'exceeded user allowance' => [
+				[
+					0 => self::ENABLED_ADMIN_USER,
+					1 => self::ENABLED_GUEST_USER,
+					2 => self::DISABLED_GUEST_USER,
+					3 => self::DISABLED_NORMAL_USER,
+					4 => self::ENABLED_GUEST_USER,
+					5 => self::ENABLED_GUEST_USER,
+					6 => self::ENABLED_NORMAL_USER,
+					8 => self::ENABLED_NORMAL_USER,
+					9 => self::ENABLED_NORMAL_USER,
+					10 => self::ENABLED_NORMAL_USER,
+					11 => self::ENABLED_NORMAL_USER,
+					12 => self::ENABLED_GUEST_USER,
+					13 => self::ENABLED_GUEST_USER,
+					14 => self::ENABLED_GUEST_USER,
+					15 => self::ENABLED_GUEST_USER,
+					16 => self::ENABLED_GUEST_USER,
+				],
+				5,
+				6,
+				8,
+				1,
+			],
+			'within user allowance' => [
+				[
+					0 => self::ENABLED_ADMIN_USER,
+					1 => self::ENABLED_GUEST_USER,
+					2 => self::DISABLED_GUEST_USER,
+					3 => self::DISABLED_NORMAL_USER,
+					4 => self::ENABLED_GUEST_USER,
+					5 => self::ENABLED_GUEST_USER,
+					6 => self::ENABLED_NORMAL_USER,
+					8 => self::ENABLED_NORMAL_USER,
+					9 => self::ENABLED_NORMAL_USER,
+					10 => self::ENABLED_GUEST_USER,
+					11 => self::ENABLED_GUEST_USER,
+					12 => self::ENABLED_GUEST_USER,
+					13 => self::ENABLED_GUEST_USER,
+					14 => self::ENABLED_GUEST_USER,
+				],
+				5,
+				4,
+				8,
+				0,
+			],
 
-		$this->userAllowance = 5;
-
-		self::assertEquals(4, $this->getActiveUsers());
-		self::assertEquals(8, $this->getActiveGuests());
-
-		// deactivation notifications will not be created
-		$this->notificationManager->expects($this->never())->method("notify");
-		$this->mailer->expects($this->never())->method("send");
-
-		$this->commandTester->execute([]);
-
-		// less users active then allowed
-		// -> no user has been touched
-		self::assertEquals(4, $this->getActiveUsers());
-		// -> guests haven't been touched
-		self::assertEquals(8, $this->getActiveGuests());
+		];
 	}
 
 	private function getActiveUsers(): int {

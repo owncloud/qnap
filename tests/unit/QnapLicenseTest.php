@@ -51,7 +51,7 @@ class QnapLicenseTest extends TestCase {
 	 * @param int $expectedUserAllowance
 	 * @param int $givenUsersAllowance
 	 */
-	public function getUserAllowance(int $expectedUserAllowance, int $givenUsersAllowance): void {
+	public function testGetUserAllowance(int $expectedUserAllowance, int $givenUsersAllowance): void {
 		$this->parser->method('getUserAllowance')->willReturn($givenUsersAllowance);
 		self::assertEquals($expectedUserAllowance, $this->license->getUserAllowance());
 	}
