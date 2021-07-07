@@ -15,13 +15,12 @@ use OCP\License\ILicenseManager;
 use OCP\Mail\IMailer;
 use OCP\Notification\IManager;
 use OCP\Notification\INotification;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Tester\CommandTester;
 use Test\TestCase;
 
 class CheckActiveusersTest extends TestCase {
-	/** @var CheckActiveUsers */
-	private $check;
+	/** @var CommandTester */
+	private $commandTester;
 
 	/** @var IUserManager */
 	private $userManager;
@@ -95,17 +94,10 @@ class CheckActiveusersTest extends TestCase {
 			16 => self::ENABLED_GUEST_USER,
 		]);
 
-		$input = $this->createMock(InputInterface::class);
-		$output = $this->createMock(OutputInterface::class);
-
-		$cmd = new \ReflectionClass(CheckActiveUsers::class);
-		$exec = $cmd->getMethod('execute');
-		$exec->setAccessible(true);
-
 		self::assertEquals(6, $this->getActiveUsers());
 		self::assertEquals(8, $this->getActiveGuests());
 
-		$exec->invokeArgs($this->check, [$input, $output]);
+		$this->commandTester->execute([]);
 
 		// one user more active then allowed
 		// -> excess users were deactivated
@@ -135,17 +127,10 @@ class CheckActiveusersTest extends TestCase {
 			14 => self::ENABLED_GUEST_USER,
 		]);
 
-		$input = $this->createMock(InputInterface::class);
-		$output = $this->createMock(OutputInterface::class);
-
-		$cmd = new \ReflectionClass(CheckActiveUsers::class);
-		$exec = $cmd->getMethod('execute');
-		$exec->setAccessible(true);
-
 		self::assertEquals(4, $this->getActiveUsers());
 		self::assertEquals(8, $this->getActiveGuests());
 
-		$exec->invokeArgs($this->check, [$input, $output]);
+		$this->commandTester->execute([]);
 
 		// one user less active then allowed
 		// -> no user has been touched
@@ -269,11 +254,12 @@ class CheckActiveusersTest extends TestCase {
 		$this->l10n = $this->createMock(IL10N::class);
 		$this->urlGenerator = $this->createMock(IURLGenerator::class);
 
-		$this->check = new CheckActiveUsers(
+		$command = new CheckActiveUsers(
 			$this->userManager, $this->mailer, $this->l10n,
 			$this->groupManager, $this->notificationManager,
 			$this->urlGenerator, $this->licenseManager,
 			$this->userTypeHelper
 		);
+		$this->commandTester = new CommandTester($command);
 	}
 }
