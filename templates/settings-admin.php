@@ -3,18 +3,23 @@
 /** @var \OCP\IL10N $l */
 ?>
 <div id="qnap" class="section">
-<h2 class="inlineblock"><?php p($l->t('ownCloud License on QNAP')); ?></h2>
+<h2 class="inlineblock"><?php p($l->t('User and License Information')); ?></h2>
 <p>
-	<?php p($l->t('Active users: %d', $_['active_users']))?>
-	<br>
-	<?php p($l->t('Licensed users: %d', $_['licensed_users']))?>
-	<br>
-	<?php p($l->t('Active guest users: %d', $_['active_guest_users']))?>
-	<br>
-	<?php p($l->t('Licensed guest users: unlimited'))?>
+
+	// TODO: hide on EE
+	<?php p($l->t('ownCloud for QNAP comes as our community edition, that is free to use for up to 5 users.'))?>
 	<br>
 	<br>
-	<a href="https://software.qnap.com/owncloud.html"><?php p($l->t('Visit the QNAP Store to purchase more licenses.')) ?></a>
+	<?php print_unescaped($l->t('If you need more than 5 users or want to use any of our <a href="https://marketplace.owncloud.com/bundles/enterprise_apps">Enterprise Apps from the Marketplace</a>, you need to upgrade to Enterprise Edition by purchasing licenses from the <a href="https://software.qnap.com/owncloud.html">QNAP Software Store</a>.'))?>
+	<br>
+	<br>
+	<?php p($l->t('Guest users don\'t count as normal users, that means you can invite as many as needed.'))?>
+	<br>
+	<br>
+	<?php p($l->t('Usage:'))?>
+	<progress value=<?php p($_['active_users']) ?> max=<?php p($_['licensed_users']) ?>></progress>
+	<?php p($l->t('%d of ', $_['active_users']))?>
+	<?php p($l->t('%d licensed users', $_['licensed_users']))?>
 	<br>
 </p>
 
