@@ -27,10 +27,7 @@ class Notifier implements INotifier {
 		}
 		$l = $this->l10NFactory->get('qnap', $languageCode);
 
-		$notification->setParsedSubject($l->t('User limit exceeded. To add more users click here'));
-
-		#$message = (string)$l->t('Your user limit is exceeded. ');
-		#$notification->setParsedMessage($message);
+		$notification->setParsedSubject($l->t('User limit exceeded. To add more users click here.'));
 
 		return $notification;
 	}
