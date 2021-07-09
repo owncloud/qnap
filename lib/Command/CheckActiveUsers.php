@@ -135,10 +135,6 @@ class CheckActiveUsers extends Command {
 		$message->setTo($recipients);
 		$message->setSubject((string) $this->l10n->t('Action required: Your ownCloud user limit is exceeded'));
 		$message->setPlainBody($plainBody);
-		// $message->setFrom([
-		// 	Util::getDefaultEmailAddress('qnap-noreply') =>
-		// 		(string)$this->l10n->t('ownCloud on QNAP'),
-		// ]); // TODO: investigate if this can be set in general ownCloud settings
 		try {
 			$this->mailer->send($message);
 			if ($output->isVerbose()) {
