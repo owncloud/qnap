@@ -46,7 +46,7 @@ class AdminPanel implements ISettings {
 			$tmpl->assign('licenses', []);
 			$tmpl->assign('licensed_users', QnapLicense::MIN_USER_ALLOWANCE);
 		}
-		$tmpl->assign('active_users', $this->getUserCount()["normal"]);
+		$tmpl->assign('active_users', $this->getUserCount());
 		return $tmpl;
 	}
 
@@ -54,18 +54,15 @@ class AdminPanel implements ISettings {
 		return 'general';
 	}
 
-	private function getUserCount(): array {
+	private function getUserCount(): int {
 		$numberOfActiveUsers = 0;
-		$numberOfActiveGuestUsers = 0;
-		$this->userManager->callForAllUsers(function (IUser $user) use (&$numberOfActiveUsers, &$numberOfActiveGuestUsers) {
+		$this->userManager->callForAllUsers(function (IUser $user) use (&$numberOfActiveUsers) {
 			if ($user->isEnabled()) {
-				if ($this->userTypeHelper->isGuestUser($user->getUID()) === true) {
-					$numberOfActiveGuestUsers++;
-				} else {
+				if ($this->userTypeHelper->isGuestUser($user->getUID()) === false) {
 					$numberOfActiveUsers++;
 				}
 			}
 		});
-		return ["normal" => $numberOfActiveUsers,  "guest" => $numberOfActiveGuestUsers];
+		return $numberOfActiveUsers;
 	}
 }
