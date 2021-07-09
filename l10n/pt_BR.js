@@ -17,6 +17,7 @@ OC.L10N.register(
     "License ID" : "ID de licença",
     "Valid from" : "Válido de",
     "Valid until" : "Válido até",
-    "Number of users" : "Número de usuários"
+    "Number of users" : "Número de usuários",
+    "Status" : "Status"
 },
 "nplurals=2; plural=(n > 1);");

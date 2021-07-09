@@ -17,6 +17,7 @@ OC.L10N.register(
     "License ID" : "ID Licence",
     "Valid from" : "E vlefshme që nga",
     "Valid until" : "E vlefshme deri më",
-    "Number of users" : "Numër përdoruesish"
+    "Number of users" : "Numër përdoruesish",
+    "Status" : "Gjendje"
 },
 "nplurals=2; plural=(n != 1);");
