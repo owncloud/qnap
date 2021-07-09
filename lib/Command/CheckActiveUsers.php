@@ -34,7 +34,6 @@ use OCP\License\ILicenseManager;
 use OCP\Mail\IMailer;
 use OCP\Notification\IManager;
 use OCP\Template;
-use OCP\Util;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
