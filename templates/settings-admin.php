@@ -14,7 +14,8 @@
 	<?php p($l->t('Guest users don\'t count as normal users, that means you can invite as many as needed.'))?>
 	<br>
 	<br>
-	<?php print_unescaped($l->t('Usage: <progress value=%d max=%d></progress> %d of %d licensed users', [$_['active_users'], $_['licensed_users'], $_['active_users'], $_['licensed_users']]))?>
+	<progress id="licensed-user-usage" value="<?php p($_['active_users']); ?>" max="<?php p($_['licensed_users']); ?>"></progress>
+	<label for="licensed-user-usage"><?php p($l->t('Usage: %d of %d licensed users', [$_['active_users'], $_['licensed_users']]))?></label>
 	<br>
 </p>
 
