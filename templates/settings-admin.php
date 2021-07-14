@@ -8,7 +8,7 @@
 	<?php p($l->t('ownCloud for QNAP comes as Community Edition by default and is free to use for up to 5 users.'))?>
 	<br>
 	<br>
-	<?php print_unescaped($l->t('If you need more than 5 users or want to use any of our <a href="https://marketplace.owncloud.com/bundles/enterprise_apps">Enterprise Apps from the Marketplace</a>, you need to upgrade to Enterprise Edition by purchasing licenses from the <a href="https://software.qnap.com/owncloud.html">QNAP Software Store</a>.'))?>
+	<?php print_unescaped($l->t('If you need more than 5 users or want to use any of our <a href="%s" target="_blank" rel="noreferrer">Enterprise Apps from the Marketplace</a>, you need to upgrade to Enterprise Edition by purchasing licenses from the <a href="%s" target="_blank" rel="noreferrer">QNAP Software Store</a>.', ['https://marketplace.owncloud.com/bundles/enterprise_apps', 'https://software.qnap.com/owncloud.html']))?>
 	<br>
 	<br>
 	<?php p($l->t('Guest users don\'t count as normal users, that means you can invite as many as needed.'))?>
