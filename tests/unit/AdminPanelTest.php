@@ -26,7 +26,6 @@ class AdminPanelTest extends TestCase {
 
 	/** @var array */
 	private $users = [];
-	private $guestUsers = [];
 	private $licenses = [];
 
 	/** @var int */
@@ -70,23 +69,18 @@ class AdminPanelTest extends TestCase {
 			[
 				0 => [
 					'enabled' => true,
-					'guest' => false,
 				],
 				1 => [
 					'enabled' => true,
-					'guest' => true,
 				],
 				2 => [
 					'enabled' => true,
-					'guest' => true,
 				],
 				3 => [
 					'enabled' => false,
-					'guest' => false,
 				],
 				4 => [
 					'enabled' => false,
-					'guest' => true,
 				]
 			]
 		);
@@ -94,10 +88,8 @@ class AdminPanelTest extends TestCase {
 		$this->userAllowance = 10;
 
 		$page = $this->panel->getPanel()->fetchPage();
-		self::assertStringContainsString("Active users: 1", $page);
-		self::assertStringContainsString("Licensed users: 10", $page);
-		self::assertStringContainsString("Active guest users: 2", $page);
-		self::assertStringContainsString("Licensed guest users: unlimited", $page);
+		self::assertStringContainsString("3 of ", $page);
+		self::assertStringContainsString(" of 10", $page);
 
 		self::assertStringContainsString("<td>license1</td>", $page);
 		self::assertStringContainsString("<td>Thursday, 18-Mar-2021 09:25:40 UTC</td>", $page);
@@ -119,8 +111,6 @@ class AdminPanelTest extends TestCase {
 			$enabled=$user["enabled"];
 			$u->method('isEnabled')->willReturn($enabled);
 			$this->users[$id] = $u;
-			$isGuest = $user['guest'];
-			$this->guestUsers[$id] = $isGuest;
 		}
 	}
 
@@ -143,12 +133,7 @@ class AdminPanelTest extends TestCase {
 		);
 
 		$this->userTypeHelper = $this->createMock(UserTypeHelper::class);
-		$this->userTypeHelper->method("isGuestUser")->will(
-			$this->returnCallback(function ($uid) {
-				$isGuest = $this->guestUsers[$uid];
-				return $isGuest;
-			})
-		);
+		$this->userTypeHelper->method("isGuestUser")->willReturn(false);
 
 		$this->userManager = $this->createMock(IUserManager::class);
 		$this->userManager->method("callForAllUsers")->will(
@@ -166,6 +151,5 @@ class AdminPanelTest extends TestCase {
 
 		$this->userAllowance = 0;
 		$this->users = [];
-		$this->guestUsers = [];
 	}
 }

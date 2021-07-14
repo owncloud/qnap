@@ -27,11 +27,7 @@ class Notifier implements INotifier {
 		}
 		$l = $this->l10NFactory->get('qnap', $languageCode);
 
-		$message = (string)$l->t('The maximum user limit was exceeded. ');
-		$message .= (string)$l->t('To add more users, purchase a license from https://software.qnap.com/owncloud.html');
-
-		$notification->setParsedSubject($l->t('Action Required: Your ownCloud licenses\' user limit was exceeded'));
-		$notification->setParsedMessage($message);
+		$notification->setParsedSubject($l->t('User limit exceeded. To add more users click here.'));
 
 		return $notification;
 	}

@@ -34,7 +34,6 @@ use OCP\License\ILicenseManager;
 use OCP\Mail\IMailer;
 use OCP\Notification\IManager;
 use OCP\Template;
-use OCP\Util;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -133,12 +132,8 @@ class CheckActiveUsers extends Command {
 		// send it out now
 		$message = $this->mailer->createMessage();
 		$message->setTo($recipients);
-		$message->setSubject((string) $this->l10n->t('Action Required: Your ownCloud licenses\' user limit was exceeded'));
+		$message->setSubject((string) $this->l10n->t('Action required: Your ownCloud user limit is exceeded'));
 		$message->setPlainBody($plainBody);
-		$message->setFrom([
-			Util::getDefaultEmailAddress('qnap-noreply') =>
-				(string)$this->l10n->t('ownCloud on QNAP'),
-		]);
 		try {
 			$this->mailer->send($message);
 			if ($output->isVerbose()) {

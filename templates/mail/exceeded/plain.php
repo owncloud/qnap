@@ -19,14 +19,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 /** @var OC_Theme $theme */
-p($l->t('Dear ownCloud - Admin,'));
+p($l->t('Dear ownCloud admin,'));
 print_unescaped("\n");
 print_unescaped("\n");
-p($l->t('The maximum user limit was exceeded.'));
+p($l->t('Your user limit is exceeded.'));
 print_unescaped("\n");
-p($l->t('To add further users, purchase a license from '));
-print_unescaped("\n");
-print_unescaped("https://software.qnap.com/owncloud.html");
+print_unescaped($l->t('To add or enable additional users, please see your licensing options at https://software.qnap.com/owncloud.html.'));
 print_unescaped("\n");
 print_unescaped("\n");
 // TRANSLATORS term at the end of a mail
@@ -36,4 +34,4 @@ print_unescaped("\n");
 
 --
 <?php p($theme->getName() . ' - ' . $theme->getSlogan()); ?>
-<?php print_unescaped("\n".$theme->getBaseUrl());
+<?php print_unescaped("\n".$theme->getBaseUrl()); ?>
