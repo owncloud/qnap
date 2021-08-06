@@ -150,7 +150,7 @@ class CheckActiveUsers extends Command {
 		}
 		$activeUsers = 0;
 		$userTypeHelper = $this->userTypeHelper;
-		$this->userManager->callForAllUsers(static function (IUser $user) use (&$activeUsers, $licensedUsers, $output, $userTypeHelper) {
+		$this->userManager->callForUsers(static function (IUser $user) use (&$activeUsers, $licensedUsers, $output, $userTypeHelper) {
 			if ($user->isEnabled() && $userTypeHelper->isGuestUser($user->getUID()) === false) {
 				$activeUsers++;
 				if ($activeUsers > $licensedUsers) {
@@ -160,7 +160,7 @@ class CheckActiveUsers extends Command {
 					}
 				}
 			}
-		});
+		}, "", false, null, 0);
 
 		return $activeUsers;
 	}
