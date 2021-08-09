@@ -6,7 +6,7 @@
     <description></description>
     <licence>GPLv2</licence>
     <author>Thomas Müller</author>
-    <version>1.4.0</version>
+    <version>1.4.1-rc1</version>
     <namespace>QNAP</namespace>
     <category>integration</category>
     <website>https://github.com/owncloud/qnap</website>
