@@ -191,6 +191,13 @@ class CheckActiveusersTest extends TestCase {
 		parent::setUp();
 
 		$this->userManager = $this->createMock(IUserManager::class);
+		$this->userManager->method("callForUsers")->will(
+			$this->returnCallback(function ($func) {
+				foreach ($this->users as $user) {
+					$func($user);
+				}
+			})
+		);
 		$this->userManager->method("callForAllUsers")->will(
 			$this->returnCallback(function ($func) {
 				foreach ($this->users as $user) {
