@@ -6,7 +6,6 @@ OC.L10N.register(
     "User limit exceeded. To add more users click here." : "Tejkalim kufiri përdoruesish. Për të shtuar më tepër përdoruesi, klikoni këtu.",
     "Dear ownCloud admin," : "I dashur përgjegjës ownCloud-i,",
     "Your user limit is exceeded." : "Është tejkaluar kufiri juaj për përdorues.",
-    "To add or enable additional users, please see your licensing options at https://software.qnap.com/owncloud.html." : "Që të shtoni ose aktivizoni më tepër përdorues, ju lutemi, shihni mundësitë e licencës tuaj, te https://software.qnap.com/owncloud.html.",
     "Cheers!" : "Gëzuar!",
     "User and License Information" : "Informacion Përdoruesish dhe Licence",
     "ownCloud for QNAP comes as Community Edition by default and is free to use for up to 5 users." : "ownCloud-i për QNAP, si parazgjedhje, vjen si Version Bashkësie dhe është falas për përdorim për deri në 5 përdorues.",

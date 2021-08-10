@@ -6,7 +6,6 @@ OC.L10N.register(
     "User limit exceeded. To add more users click here." : "Käyttäjämäärä ylitetty. Lisää käyttäjiä klikkaamalla tästä.",
     "Dear ownCloud admin," : "Arvoisa ownCloud-pääkäyttäjä,",
     "Your user limit is exceeded." : "Käyttäjäraja on ylitetty.",
-    "To add or enable additional users, please see your licensing options at https://software.qnap.com/owncloud.html." : "Ottaaksesi käyttöön tai lisätäksesi käyttäjiä, tutustu lisenssivaihtoehtoihin osoitteessa https://software.qnap.com/owncloud.html.",
     "Cheers!" : "Kiitos!",
     "User and License Information" : "Käyttäjä- ja lisenssitiedot",
     "ownCloud for QNAP comes as Community Edition by default and is free to use for up to 5 users." : "ownCloud for QNAP on oletusarvoisest Community Edition ja on maksuton 5 käyttäjään asti.",
