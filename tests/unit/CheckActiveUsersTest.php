@@ -56,11 +56,11 @@ class CheckActiveusersTest extends TestCase {
 	private $userAllowance = 0;
 
 	/** @var array */
-	const ENABLED_ADMIN_USER = ['enabled' => true, 'admin' => true, 'guest' => false];
-	const ENABLED_GUEST_USER = ['enabled' => true, 'admin' => false, 'guest' => true];
-	const DISABLED_GUEST_USER = ['enabled' => false, 'admin' => false, 'guest' => true];
-	const ENABLED_NORMAL_USER = ['enabled' => true, 'admin' => false, 'guest' => false];
-	const DISABLED_NORMAL_USER = ['enabled' => false, 'admin' => false, 'guest' => false];
+	public const ENABLED_ADMIN_USER = ['enabled' => true, 'admin' => true, 'guest' => false];
+	public const ENABLED_GUEST_USER = ['enabled' => true, 'admin' => false, 'guest' => true];
+	public const DISABLED_GUEST_USER = ['enabled' => false, 'admin' => false, 'guest' => true];
+	public const ENABLED_NORMAL_USER = ['enabled' => true, 'admin' => false, 'guest' => false];
+	public const DISABLED_NORMAL_USER = ['enabled' => false, 'admin' => false, 'guest' => false];
 
 	/**
 	 * @dataProvider providesUserAllowance
@@ -253,9 +253,13 @@ class CheckActiveusersTest extends TestCase {
 		$this->urlGenerator = $this->createMock(IURLGenerator::class);
 
 		$command = new CheckActiveUsers(
-			$this->userManager, $this->mailer, $this->l10n,
-			$this->groupManager, $this->notificationManager,
-			$this->urlGenerator, $this->licenseManager,
+			$this->userManager,
+			$this->mailer,
+			$this->l10n,
+			$this->groupManager,
+			$this->notificationManager,
+			$this->urlGenerator,
+			$this->licenseManager,
 			$this->userTypeHelper
 		);
 		$this->commandTester = new CommandTester($command);

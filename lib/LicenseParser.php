@@ -34,8 +34,8 @@ class LicenseParser {
 		$now = $this->timeFactory->getTime();
 		foreach ($licenses as $r) {
 			$license =  \json_decode($r['license_info_json_str'] ?? '{}', true);
-			$validFrom = \DateTime::createFromFormat(self::DATETIME_FORMAT, $license['valid_from']);
-			$validUntil = \DateTime::createFromFormat(self::DATETIME_FORMAT, $license['valid_until']);
+			$validFrom = \DateTime::createFromFormat(self::DATETIME_FORMAT, $license['valid_from']); // @phan-suppress-current-line PhanTypeArraySuspiciousNullable
+			$validUntil = \DateTime::createFromFormat(self::DATETIME_FORMAT, $license['valid_until']); // @phan-suppress-current-line PhanTypeArraySuspiciousNullable
 			# invalid license information
 			# TODO: log
 			if ($validFrom === false || $validUntil === false) {
