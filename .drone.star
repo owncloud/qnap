@@ -31,16 +31,18 @@ config = {
             ],
             "databases": [
                 "sqlite",
+                "mariadb:10.2",
+                "postgres:13.3",
             ],
-            "coverage": True,
         },
         "reducedDatabases": {
             "phpVersions": [
                 "7.3",
             ],
             "databases": [
-                "mysql:5.5",
-                "postgres:9.4",
+                "sqlite",
+                "mariadb:10.2",
+                "postgres:13.3",
             ],
             "coverage": False,
         },
