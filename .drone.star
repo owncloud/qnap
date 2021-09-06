@@ -14,20 +14,13 @@ config = {
     "branches": [
         "master",
     ],
-    "appInstallCommand": "make vendor",
     "codestyle": True,
-    "javascript": False,
     "phpstan": True,
     "phan": True,
-    "build": {
-        "commands": [
-            "make -f Makefile.release dist",
-        ],
-    },
     "phpunit": {
-        "codecov": {
+        "allDatabases": {
             "phpVersions": [
-                "7.2",
+                "7.3",
             ],
             "databases": [
                 "sqlite",
@@ -37,7 +30,7 @@ config = {
         },
         "reducedDatabases": {
             "phpVersions": [
-                "7.3",
+                "7.4",
             ],
             "databases": [
                 "sqlite",
