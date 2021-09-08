@@ -70,15 +70,16 @@ class CheckActiveusersTest extends TestCase {
 	 * @param int $expectedGuests
 	 * @param int $expectedNotifications
 	 */
-	public function testCommand(array $users, int $userAllowance, int $expectedUsersBefore, int $expectedGuests, int $expectedNotifications): void {
+	public function testCommand(array $users, array $alwaysActiveUsers, array $disabledUsers, int $userAllowance, int $expectedUsersBefore, int $expectedGuests, int $expectedNotifications, int $expectedEmails): void {
+		ksort($users);
 		$this->defineUsers($users);
 		$this->userAllowance = $userAllowance;
 
 		self::assertEquals($expectedUsersBefore, $this->getActiveUsers());
 		self::assertEquals($expectedGuests, $this->getActiveGuests());
 
-		$this->notificationManager->expects($this->exactly($expectedNotifications))->method("notify");
-		$this->mailer->expects($this->exactly($expectedNotifications))->method("send");
+		$this->notificationManager->expects($this->exactly($expectedNotifications))->method("notify"); // each admin user gets its own notification
+		$this->mailer->expects($this->exactly($expectedEmails))->method("send"); // mail is send to all admins together -> only once
 
 		$usersBefore = $this->getActiveUsers();
 
@@ -89,55 +90,143 @@ class CheckActiveusersTest extends TestCase {
 			self::assertEquals($this->userAllowance, $this->getActiveUsers());
 		}
 		self::assertEquals($expectedGuests, $this->getActiveGuests());
+
+		foreach ($alwaysActiveUsers as $user) {
+			self::assertTrue($this->enabledUsers[$user], $user);
+		}
+
+		foreach ($disabledUsers as $user) {
+			self::assertFalse($this->enabledUsers[$user], $user);
+		}
 	}
 
 	public function providesUserAllowance(): array {
 		return [
 			'exceeded user allowance' => [
 				[
-					0 => self::ENABLED_ADMIN_USER,
-					1 => self::ENABLED_GUEST_USER,
-					2 => self::DISABLED_GUEST_USER,
-					3 => self::DISABLED_NORMAL_USER,
-					4 => self::ENABLED_GUEST_USER,
-					5 => self::ENABLED_GUEST_USER,
-					6 => self::ENABLED_NORMAL_USER,
-					8 => self::ENABLED_NORMAL_USER,
-					9 => self::ENABLED_NORMAL_USER,
-					10 => self::ENABLED_NORMAL_USER,
-					11 => self::ENABLED_NORMAL_USER,
-					12 => self::ENABLED_GUEST_USER,
-					13 => self::ENABLED_GUEST_USER,
-					14 => self::ENABLED_GUEST_USER,
-					15 => self::ENABLED_GUEST_USER,
-					16 => self::ENABLED_GUEST_USER,
+					'0000-guest' => self::ENABLED_GUEST_USER,
+					'0001-guest' => self::ENABLED_GUEST_USER,
+					'0002-guest' => self::ENABLED_GUEST_USER,
+					'001-guest' => self::ENABLED_GUEST_USER,
+					'001-user' => self::DISABLED_NORMAL_USER,
+					'002-guest' => self::DISABLED_GUEST_USER,
+					'002-user' => self::ENABLED_NORMAL_USER,
+					'003-guest' => self::ENABLED_GUEST_USER,
+					'003-user' => self::ENABLED_NORMAL_USER,
+					'004-guest' => self::ENABLED_GUEST_USER,
+					'004-user' => self::ENABLED_NORMAL_USER,
+					'005-guest' => self::ENABLED_GUEST_USER,
+					'005-user' => self::ENABLED_NORMAL_USER,
+					'006-guest' => self::ENABLED_GUEST_USER,
+					'006-user' => self::ENABLED_NORMAL_USER,
+					'admin' => self::ENABLED_ADMIN_USER,
+					'user-001' => self::ENABLED_NORMAL_USER,
+					'user-002' => self::ENABLED_NORMAL_USER,
+					'user-003' => self::ENABLED_NORMAL_USER,
+					'user-004' => self::ENABLED_NORMAL_USER,
+					'user-005' => self::ENABLED_NORMAL_USER,
+					'zzz-admin' => self::ENABLED_ADMIN_USER,
+				],
+				[
+					'0000-guest',
+					'0001-guest',
+					'0002-guest',
+					'001-guest',
+					'002-user',
+					'003-guest',
+					'003-user',
+					'004-guest',
+					'004-user',
+					'005-guest',
+					'006-guest',
+					'admin',
+					'zzz-admin',
+				],
+				[
+					'001-user',
+					'002-guest',
+					'005-user',
+					'006-user',
+					'user-001',
+					'user-002',
+					'user-003',
+					'user-004',
+					'user-005',
+
 				],
 				5,
-				6,
+				12,
 				8,
+				2, // there are two admin users which receive notifications
 				1,
 			],
 			'within user allowance' => [
 				[
-					0 => self::ENABLED_ADMIN_USER,
-					1 => self::ENABLED_GUEST_USER,
-					2 => self::DISABLED_GUEST_USER,
-					3 => self::DISABLED_NORMAL_USER,
-					4 => self::ENABLED_GUEST_USER,
-					5 => self::ENABLED_GUEST_USER,
-					6 => self::ENABLED_NORMAL_USER,
-					8 => self::ENABLED_NORMAL_USER,
-					9 => self::ENABLED_NORMAL_USER,
-					10 => self::ENABLED_GUEST_USER,
-					11 => self::ENABLED_GUEST_USER,
-					12 => self::ENABLED_GUEST_USER,
-					13 => self::ENABLED_GUEST_USER,
-					14 => self::ENABLED_GUEST_USER,
+					'001-guest' => self::ENABLED_GUEST_USER,
+					'001-user' => self::DISABLED_NORMAL_USER,
+					'002-guest' => self::DISABLED_GUEST_USER,
+					'002-user' => self::ENABLED_NORMAL_USER,
+					'003-guest' => self::ENABLED_GUEST_USER,
+					'003-user' => self::ENABLED_NORMAL_USER,
+					'004-guest' => self::ENABLED_GUEST_USER,
+					'004-user' => self::ENABLED_NORMAL_USER,
+					'005-guest' => self::ENABLED_GUEST_USER,
+					'006-guest' => self::ENABLED_GUEST_USER,
+					'007-guest' => self::ENABLED_GUEST_USER,
+					'008-guest' => self::ENABLED_GUEST_USER,
+					'009-guest' => self::ENABLED_GUEST_USER,
+					'admin' => self::ENABLED_ADMIN_USER,
+				],
+				[
+					'001-guest',
+					'002-user',
+					'003-guest',
+					'003-user',
+					'004-guest',
+					'004-user',
+					'005-guest',
+					'006-guest',
+					'007-guest',
+					'008-guest',
+					'009-guest',
+					'admin',
+				],
+				[
+					'001-user',
+					'002-guest',
 				],
 				5,
 				4,
 				8,
+				0, // there is one admin user, but no user gets disabled
 				0,
+			],
+			'only admins but exceeding user limit' => [
+				[
+					'001-admin' => self::ENABLED_ADMIN_USER,
+					'002-admin' => self::ENABLED_ADMIN_USER,
+					'003-admin' => self::ENABLED_ADMIN_USER,
+					'004-admin' => self::ENABLED_ADMIN_USER,
+					'005-admin' => self::ENABLED_ADMIN_USER,
+					'006-admin' => self::ENABLED_ADMIN_USER,
+					'007-admin' => self::ENABLED_ADMIN_USER,
+				],
+				[
+					'003-admin',
+					'004-admin',
+					'005-admin',
+					'006-admin',
+					'007-admin',
+				],
+				[
+					'001-admin',
+					'002-admin',
+				],
+				5,
+				7,
+				0,
+				7, // there are 7 admin users which receive notifications
+				1,
 			],
 
 		];
