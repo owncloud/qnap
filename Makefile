@@ -1,89 +1,108 @@
 SHELL := /bin/bash
 
-YARN := $(shell command -v yarn 2> /dev/null)
-NODE_PREFIX=$(shell pwd)
 COMPOSER_BIN := $(shell command -v composer 2> /dev/null)
 
-NPM := $(shell command -v npm 2> /dev/null)
-ifndef NPM
-    $(error npm is not available on your system, please install npm)
-endif
+# directories
+app_name=$(notdir $(CURDIR))
+build_dir=$(CURDIR)/build
+dist_dir=$(build_dir)/dist
+doc_files=README.md LICENSE
+src_dirs=appinfo lib vendor
+all_src=$(src_dirs) $(doc_files)
 
-app_name=qnap
+acceptance_test_deps=vendor-bin/behat/vendor
 
 # bin file definitions
-PHPUNIT=php -d zend.enable_gc=0  "$(PWD)/../../lib/composer/bin/phpunit"
-PHPUNITDBG=phpdbg -qrr -d memory_limit=4096M -d zend.enable_gc=0 "$(PWD)/../../lib/composer/bin/phpunit"
+PHPUNIT=php -d zend.enable_gc=0 ../../lib/composer/bin/phpunit
+PHPUNITDBG=phpdbg -qrr -d memory_limit=4096M -d zend.enable_gc=0 "../../lib/composer/bin/phpunit"
 PHP_CS_FIXER=php -d zend.enable_gc=0 vendor-bin/owncloud-codestyle/vendor/bin/php-cs-fixer
 PHAN=php -d zend.enable_gc=0 vendor-bin/phan/vendor/bin/phan
 PHPSTAN=php -d zend.enable_gc=0 vendor-bin/phpstan/vendor/bin/phpstan
+BEHAT_BIN=vendor-bin/behat/vendor/bin/behat
 
-KARMA=$(NODE_PREFIX)/node_modules/.bin/karma
+occ?=$(CURDIR)/../../occ
+private_key?=$(HOME)/.owncloud/certificates/$(app_name).key
+certificate?=$(HOME)/.owncloud/certificates/$(app_name).crt
+sign?=$(occ) integrity:sign-app --privateKey="$(private_key)" --certificate="$(certificate)"
+sign_skip_msg="Skipping signing, either no key and certificate found in $(private_key) and $(certificate) or occ can not be found at $(occ)"
+ifneq (,$(wildcard $(private_key)))
+ifneq (,$(wildcard $(certificate)))
+ifneq (,$(wildcard $(occ)))
+	CAN_SIGN=true
+endif
+endif
+endif
 
-.DEFAULT_GOAL := all
+# start with displaying help
+.DEFAULT_GOAL := help
 
 help:
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//' | sed -e 's/  */ /' | column -t -s :
 
-##
-## Entrypoints
-##----------------------
-
-.PHONY: all
-all: install-deps
-
-# Remove the appstore build
 .PHONY: clean
-clean: clean-nodejs-deps clean-composer-deps
-	rm -rf ./build
-
-.PHONY: clean-nodejs-deps
-clean-nodejs-deps:
-	rm -Rf $(nodejs_deps)
+clean: clean-composer-deps clean-build-dir clean-vendor
 
 .PHONY: clean-composer-deps
 clean-composer-deps:
-	rm -rf ./vendor
 	rm -Rf vendor-bin/**/vendor vendor-bin/**/composer.lock
 
-.PHONY: dev
-dev: ## Initialize dev environment
-dev: install-deps
+.PHONY: clean-vendor
+clean-vendor:
+	rm -Rf vendor
 
-#
-# Release
-# make this app compatible with the ownCloud
-# default build tools
-#
+.PHONY: clean-build-dir
+clean-build-dir:
+	rm -Rf $(build_dir)
+
+##---------------------
+## Build targets
+##---------------------
+
 .PHONY: dist
-dist:
-	make -f Makefile.release dist
+dist: ## Build distribution
+dist: vendor distdir sign package
 
-$(KARMA): $(nodejs_deps)
+.PHONY: distdir
+distdir:
+	rm -rf $(build_dir)
+	mkdir -p $(dist_dir)/$(app_name)
+	cp -R $(all_src) $(dist_dir)/$(app_name)
 
-##
+.PHONY: sign
+sign:
+ifdef CAN_SIGN
+	$(sign) --path="$(dist_dir)/$(app_name)"
+else
+	@echo $(sign_skip_msg)
+endif
+
+.PHONY: package
+package:
+	tar -czf $(dist_dir)/$(app_name).tar.gz -C $(dist_dir) $(app_name)
+
+##---------------------
 ## Tests
-##----------------------
+##---------------------
 
 .PHONY: test-php-unit
 test-php-unit: ## Run php unit tests
-test-php-unit: vendor/bin/phpunit
-	$(PHPUNIT) --configuration ./phpunit.xml --testsuite qnap-unit
+test-php-unit: ../../lib/composer/bin/phpunit
+	$(PHPUNIT) --configuration ./phpunit.xml --testsuite unit
 
 .PHONY: test-php-unit-dbg
 test-php-unit-dbg: ## Run php unit tests using phpdbg
-test-php-unit-dbg: vendor/bin/phpunit
-	$(PHPUNITDBG) --configuration ./phpunit.xml --testsuite qnap-unit
+test-php-unit-dbg: ../../lib/composer/bin/phpunit
+	$(PHPUNITDBG) --configuration ./phpunit.xml --testsuite unit
 
 .PHONY: test-php-style
 test-php-style: ## Run php-cs-fixer and check owncloud code-style
 test-php-style: vendor-bin/owncloud-codestyle/vendor
-	$(PHP_CS_FIXER) fix -v --diff --diff-format udiff --allow-risky yes --dry-run
+	$(PHP_CS_FIXER) fix -v --diff --allow-risky yes --dry-run
 
 .PHONY: test-php-style-fix
 test-php-style-fix: ## Run php-cs-fixer and fix code style issues
 test-php-style-fix: vendor-bin/owncloud-codestyle/vendor
-	$(PHP_CS_FIXER) fix -v --diff --diff-format udiff --allow-risky yes
+	$(PHP_CS_FIXER) fix -v --diff --allow-risky yes
 
 .PHONY: test-php-phan
 test-php-phan: ## Run phan
@@ -95,9 +114,30 @@ test-php-phpstan: ## Run phpstan
 test-php-phpstan: vendor-bin/phpstan/vendor
 	$(PHPSTAN) analyse --memory-limit=4G --configuration=./phpstan.neon --no-progress --level=5 appinfo lib
 
-.PHONY: test-js
-test-js: $(nodejs_deps)
-	$(KARMA) start tests/js/karma.config.js --single-run
+.PHONY: test-acceptance-api
+test-acceptance-api: ## Run API acceptance tests
+test-acceptance-api: $(acceptance_test_deps)
+	BEHAT_BIN=$(BEHAT_BIN) ../../tests/acceptance/run.sh --remote --type api
+
+.PHONY: test-acceptance-cli
+test-acceptance-cli: ## Run CLI acceptance tests
+test-acceptance-cli: $(acceptance_test_deps)
+	BEHAT_BIN=$(BEHAT_BIN) ../../tests/acceptance/run.sh --remote --type cli
+
+.PHONY: test-acceptance-webui
+test-acceptance-webui: ## Run webUI acceptance tests
+test-acceptance-webui: $(acceptance_test_deps)
+	BEHAT_BIN=$(BEHAT_BIN) ../../tests/acceptance/run.sh --remote --type webUI
+
+.PHONY: test-acceptance-core-api
+test-acceptance-core-api: ## Run core API acceptance tests
+test-acceptance-core-api: $(acceptance_test_deps)
+	BEHAT_BIN=$(BEHAT_BIN) ../../tests/acceptance/run.sh --remote --type api -c ../../tests/acceptance/config/behat.yml --tags '~@skipOnEncryption&&~@skipOnEncryptionType:${ENCRYPTION_TYPE}&&~@skip'
+
+.PHONY: test-acceptance-core-webui
+test-acceptance-core-webui: ## Run core webUI acceptance tests
+test-acceptance-core-webui: $(acceptance_test_deps)
+	BEHAT_BIN=$(BEHAT_BIN) ../../tests/acceptance/run.sh --remote --type webui -c ../../tests/acceptance/config/behat.yml --tags '~@skipOnEncryption&&~@skipOnEncryptionType:${ENCRYPTION_TYPE}&&~@skip'
 
 #
 # Translation
@@ -128,48 +168,39 @@ l10n-write: l10n/l10n.pl
 l10n/l10n.pl:
 	wget -qO l10n/l10n.pl https://raw.githubusercontent.com/owncloud-ci/transifex/d1c63674d791fe8812216b29da9d8f2f26e7e138/rootfs/usr/bin/l10n
 
-##
-## Dependency management
-##----------------------
-
-.PHONY: install-deps
-install-deps: ## Install dependencies
-install-deps: install-php-deps install-js-deps
+#
+# Dependency management
+#----------------------
 
 composer.lock: composer.json
 	@echo composer.lock is not up to date.
 
-.PHONY: install-php-deps
-install-php-deps: ## Install PHP dependencies
-install-php-deps: vendor vendor-bin composer.json composer.lock
+vendor:
+	composer install --no-dev
 
-.PHONY: install-js-deps
-install-js-deps: ## Install PHP dependencies
-install-js-deps: $(nodejs_deps)
-
-vendor: composer.lock
-	$(COMPOSER_BIN) install --no-dev
-
-vendor/bin/phpunit: composer.lock
-	$(COMPOSER_BIN) install
-
-vendor/bamarni/composer-bin-plugin: composer.lock
-	$(COMPOSER_BIN) install
+vendor/bamarni/composer-bin-plugin:
+	composer install
 
 vendor-bin/owncloud-codestyle/vendor: vendor/bamarni/composer-bin-plugin vendor-bin/owncloud-codestyle/composer.lock
-	$(COMPOSER_BIN) bin owncloud-codestyle install --no-progress
+	composer bin owncloud-codestyle install --no-progress
 
 vendor-bin/owncloud-codestyle/composer.lock: vendor-bin/owncloud-codestyle/composer.json
 	@echo owncloud-codestyle composer.lock is not up to date.
 
 vendor-bin/phan/vendor: vendor/bamarni/composer-bin-plugin vendor-bin/phan/composer.lock
-	$(COMPOSER_BIN) bin phan install --no-progress
+	composer bin phan install --no-progress
 
 vendor-bin/phan/composer.lock: vendor-bin/phan/composer.json
 	@echo phan composer.lock is not up to date.
 
 vendor-bin/phpstan/vendor: vendor/bamarni/composer-bin-plugin vendor-bin/phpstan/composer.lock
-	$(COMPOSER_BIN) bin phpstan install --no-progress
+	composer bin phpstan install --no-progress
 
 vendor-bin/phpstan/composer.lock: vendor-bin/phpstan/composer.json
 	@echo phpstan composer.lock is not up to date.
+
+vendor-bin/behat/vendor: vendor/bamarni/composer-bin-plugin vendor-bin/behat/composer.lock
+	composer bin behat install --no-progress
+
+vendor-bin/behat/composer.lock: vendor-bin/behat/composer.json
+	@echo behat composer.lock is not up to date.
