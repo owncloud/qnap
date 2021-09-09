@@ -59,6 +59,7 @@ class CheckActiveUsers extends Command {
 
 	/** @var IUser[] */
 	private $adminUsers = [];
+	private $normalUsers = [];
 
 	/** @var int */
 	private $numberOfActiveUsers = 0;
@@ -149,18 +150,21 @@ class CheckActiveUsers extends Command {
 			$output->writeln('Disabling user without license:');
 		}
 		$activeUsers = 0;
-		$userTypeHelper = $this->userTypeHelper;
-		$this->userManager->callForUsers(static function (IUser $user) use (&$activeUsers, $licensedUsers, $output, $userTypeHelper) {
-			if ($user->isEnabled() && $userTypeHelper->isGuestUser($user->getUID()) === false) {
-				$activeUsers++;
-				if ($activeUsers > $licensedUsers) {
-					$user->setEnabled(false);
-					if ($output->isVerbose()) {
-						$output->writeln($user->getUID());
+		$usergroups = [\array_reverse($this->adminUsers), $this->normalUsers];
+
+		foreach ($usergroups as $users) {
+			foreach ($users as $user) {
+				if ($user->isEnabled()) {
+					$activeUsers++;
+					if ($activeUsers > $licensedUsers) {
+						$user->setEnabled(false);
+						if ($output->isVerbose()) {
+							$output->writeln($user->getUID());
+						}
 					}
 				}
 			}
-		}, "", false, null, 0);
+		}
 
 		return $activeUsers;
 	}
@@ -169,9 +173,11 @@ class CheckActiveUsers extends Command {
 		$this->userManager->callForAllUsers(function (IUser $user) {
 			if ($user->isEnabled() && $this->userTypeHelper->isGuestUser($user->getUID()) === false) {
 				$this->numberOfActiveUsers++;
-			}
-			if ($this->groupManager->isAdmin($user->getUID())) {
-				$this->adminUsers[]= $user;
+				if ($this->groupManager->isAdmin($user->getUID())) {
+					$this->adminUsers[]= $user;
+				} else {
+					$this->normalUsers[]= $user;
+				}
 			}
 		});
 	}

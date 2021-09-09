@@ -6,10 +6,10 @@
 		 timeoutForLargeTests="900"
 >
 	<testsuites>
-		<testsuite name='qnap-unit'>
+		<testsuite name='unit'>
 			<directory suffix='Test.php'>./tests/unit</directory>
 		</testsuite>
-		<testsuite name='qnap-integration'>
+		<testsuite name='integration'>
 			<directory suffix='Test.php'>./tests/integration</directory>
 		</testsuite>
 	</testsuites>

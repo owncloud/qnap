@@ -7,7 +7,7 @@ app_name=$(notdir $(CURDIR))
 build_dir=$(CURDIR)/build
 dist_dir=$(build_dir)/dist
 doc_files=README.md LICENSE
-src_dirs=appinfo lib vendor
+src_dirs=appinfo lib vendor templates
 all_src=$(src_dirs) $(doc_files)
 
 acceptance_test_deps=vendor-bin/behat/vendor
