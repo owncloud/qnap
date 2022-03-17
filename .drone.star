@@ -50,7 +50,7 @@ config = {
     "phpunit": {
         "allDatabases": {
             "phpVersions": [
-                "7.3",
+                DEFAULT_PHP_VERSION,
             ],
             "databases": [
                 "sqlite",
@@ -60,7 +60,7 @@ config = {
         },
         "reducedDatabases": {
             "phpVersions": [
-                DEFAULT_PHP_VERSION,
+                "7.3",
             ],
             "databases": [
                 "sqlite",
