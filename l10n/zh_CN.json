@@ -1,0 +1,21 @@
+{ "translations": {
+    "QNAP" : "QNAP",
+    "Action required: Your ownCloud user limit is exceeded" : "需要采取的措施：超出您 ownCloud 的用户限制",
+    "User limit exceeded. To add more users click here." : "超出用户限制。 要添加更多用户，请单击此处。",
+    "Dear ownCloud admin," : "尊敬的 ownCloud 管理员，",
+    "Your user limit is exceeded." : "超出了您的用户限制。",
+    "To add or enable additional users, please see https://software.qnap.com/owncloud.html for your licensing options." : "要添加或启用其他用户，请参阅 https://software.qnap.com/owncloud.html 了解您的许可选项。",
+    "Cheers!" : "干杯！",
+    "User and License Information" : "用户和许可信息",
+    "ownCloud for QNAP comes as Community Edition by default and is free to use for up to 5 users." : "ownCloud for QNAP 默认为社区版，最多可供 5 位用户免费使用。",
+    "If you need more than 5 users or want to use any of our <a href=\"%s\" target=\"_blank\" rel=\"noreferrer\">Enterprise Apps from the Marketplace</a>, you need to upgrade to Enterprise Edition by purchasing licenses from the <a href=\"%s\" target=\"_blank\" rel=\"noreferrer\">QNAP Software Store</a>." : "如果您希望5个或以上用户使用我们的<a href=\"%s\" target=\"_blank\" rel=\"noreferrer\">企业级APP</a>，您可以通过 <a href=\"%s\" target=\"_blank\" rel=\"noreferrer\">威联通APP市场</a>升级到企业版。",
+    "Guest users don't count as normal users, that means you can invite as many as needed." : "访客用户不算作普通用户，这意味着您可以根据需要邀请任意数量的用户。",
+    "Usage: %d of %d licensed users" : "用法：%d 个许可用户中的%d个",
+    "License Overview" : "许可证概述",
+    "License ID" : "许可证编号",
+    "Valid from" : "生效期",
+    "Valid until" : "有效期至",
+    "Number of users" : "用户数",
+    "Status" : "状态"
+},"pluralForm" :"nplurals=1; plural=0;"
+}
