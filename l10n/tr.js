@@ -1,0 +1,23 @@
+OC.L10N.register(
+    "qnap",
+    {
+    "QNAP" : "QNAP",
+    "Action required: Your ownCloud user limit is exceeded" : "Eylem gerekli: ownCloud kullanıcı sınırınız aşıldı",
+    "User limit exceeded. To add more users click here." : "Kullanıcı sınırı aşıldı. Daha fazla kullanıcı eklemek için burayı tıklayın.",
+    "Dear ownCloud admin," : "Sevgili ownCloud yöneticisi,",
+    "Your user limit is exceeded." : "Kullanıcı sınırınız aşıldı.",
+    "To add or enable additional users, please see https://software.qnap.com/owncloud.html for your licensing options." : "Ek kullanıcılar eklemek veya etkinleştirmek için lütfen lisanslama seçenekleriniz için https://software.qnap.com/owncloud.html adresine bakın.",
+    "Cheers!" : "Hoşçakalın!",
+    "User and License Information" : "Kullanıcı ve Lisans Bilgisi",
+    "ownCloud for QNAP comes as Community Edition by default and is free to use for up to 5 users." : "QNAP için ownCloud, varsayılan olarak Topluluk Sürümü olarak gelir ve 5 kullanıcıya kadar ücretsizdir.",
+    "If you need more than 5 users or want to use any of our <a href=\"%s\" target=\"_blank\" rel=\"noreferrer\">Enterprise Apps from the Marketplace</a>, you need to upgrade to Enterprise Edition by purchasing licenses from the <a href=\"%s\" target=\"_blank\" rel=\"noreferrer\">QNAP Software Store</a>." : "5'ten fazla kullanıcıya ihtiyacınız varsa veya <a href=\"%s\" target=\"_blank\" rel=\"noreferrer\">Marketplace'teki Kurumsal Uygulamalarımızdan</a> herhangi birini kullanmak istiyorsanız, <a href=\"%s\" target=\"_blank\" rel=\"noreferrer\">QNAP Yazılım Mağazasından</a> lisans satın alarak Enterprise Edition'a yükseltmeniz gerekir.",
+    "Guest users don't count as normal users, that means you can invite as many as needed." : "Misafir kullanıcılar normal kullanıcılar olarak sayılmaz; bu, gerektiği kadar davet edebileceğiniz anlamına gelir.",
+    "Usage: %d of %d licensed users" : "Kullanım: %d/%d lisanslı kullanıcı",
+    "License Overview" : "Lisans Genel Bakışı",
+    "License ID" : "Lisans ID",
+    "Valid from" : "Geçerlilik başlangıcı",
+    "Valid until" : "Geçerlilik bitişi",
+    "Number of users" : "Kullanıcı sayısı",
+    "Status" : "Durum"
+},
+"nplurals=2; plural=(n > 1);");
