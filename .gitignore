@@ -6,3 +6,4 @@ vendor-bin/**/composer.lock
 /build/
 /tests/output/
 .phpunit.result.cache
+.idea/
