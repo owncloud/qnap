@@ -49,29 +49,7 @@ config = {
     "codestyle": True,
     "phpstan": True,
     "phan": True,
-    "phpunit": {
-        "allDatabases": {
-            "phpVersions": [
-                DEFAULT_PHP_VERSION,
-            ],
-            "databases": [
-                "sqlite",
-                "mariadb:10.2",
-                "postgres:13.3",
-            ],
-        },
-        "reducedDatabases": {
-            "phpVersions": [
-                "7.3",
-            ],
-            "databases": [
-                "sqlite",
-                "mariadb:10.2",
-                "postgres:13.3",
-            ],
-            "coverage": False,
-        },
-    },
+    "phpunit": True,
 }
 
 def main(ctx):
