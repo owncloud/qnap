@@ -16,7 +16,7 @@ OC.L10N.register(
     "License Overview" : "Преглед на лиценза",
     "License ID" : "Лиценз ID",
     "Valid from" : "Валидeн от",
-    "Valid until" : "Валиден до",
+    "Valid until" : "Валидно до",
     "Number of users" : "Брой потребители",
     "Status" : "Статус"
 },
