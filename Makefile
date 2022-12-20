@@ -145,11 +145,11 @@ test-acceptance-core-webui: $(acceptance_test_deps)
 
 .PHONY: l10n-push
 l10n-push:
-	cd l10n && tx -d push -s --skip --no-interactive
+	cd l10n && tx push -s --skip
 
 .PHONY: l10n-pull
 l10n-pull:
-	cd l10n && tx -d pull -a --skip --minimum-perc=75
+	cd l10n && tx pull -a --skip --minimum-perc=75
 
 .PHONY: l10n-clean
 l10n-clean:
