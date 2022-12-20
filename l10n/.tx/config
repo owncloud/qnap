@@ -2,7 +2,7 @@
 host = https://www.transifex.com
 lang_map = ja_JP: ja
 
-[owncloud.qnap]
+[o:owncloud-org:p:owncloud:r:qnap]
 file_filter = <lang>/qnap.po
 source_file = templates/qnap.pot
 source_lang = en
