@@ -8,6 +8,7 @@
     "Cheers!" : "לחיים!",
     "User and License Information" : "פרטי משתמשים ורישיון",
     "ownCloud for QNAP comes as Community Edition by default and is free to use for up to 5 users." : "ownCloud ל־QNAP מושק כמהדורה קהילתית כברירת מחדל והשימוש בו חופשי עד 5 משתמשים.",
+    "If you need more than 5 users or want to use any of our <a href=\"%s\" target=\"_blank\" rel=\"noreferrer\">Enterprise Apps from the Marketplace</a>, you need to upgrade to Enterprise Edition by purchasing licenses from the <a href=\"%s\" target=\"_blank\" rel=\"noreferrer\">QNAP Software Store</a>." : "אם דרושים לך יותר מ־5 משתמשים או שמעניין אותך להשתמש ב<a href=\"%s\" target=\"_blank\" rel=\"noreferrer\">יישומים מסחריים מהחנות</a>, יש לשדרג לגרסה מסחרית על ידי רכישת רישיונות מ<a href=\"%s\" target=\"_blank\" rel=\"noreferrer\">חנות התוכנה של QNAP</a>.",
     "Guest users don't count as normal users, that means you can invite as many as needed." : "משתמשים אורחים לא נחשבים למשתמשים רגילים, כלומר שניתן להזמין כמה שצריך.",
     "Usage: %d of %d licensed users" : "ניצולת: %d מתוך %d משתמשים ברישיון",
     "License Overview" : "סקירת רישיון",
