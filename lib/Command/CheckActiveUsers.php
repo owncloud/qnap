@@ -87,7 +87,7 @@ class CheckActiveUsers extends Command {
 			->setDescription('Check if the number of allowed users is exceeded and disables those who are not allowed to be used');
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$this->prepare();
 
 		$licensedUsers = $this->getLicensedUsers();
