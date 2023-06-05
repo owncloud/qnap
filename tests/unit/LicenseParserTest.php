@@ -7,7 +7,6 @@ use OCP\AppFramework\Utility\ITimeFactory;
 use Test\TestCase;
 
 class LicenseParserTest extends TestCase {
-
 	/**
 	 * @var LicenseParser
 	 */
